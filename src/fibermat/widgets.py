@@ -98,7 +98,7 @@ class Settings(dict):
         self.lmax.switch.observe(lmax_on_changed) ; lmax_on_changed()
         self.interp_size.switch.observe(interp_size_on_changed) ; interp_size_on_changed()
 
-        # Initialize `Settings` object
+        # Initialize widget dictionary
         super().__init__(dict(
             n=self.n,
             length=self.length,

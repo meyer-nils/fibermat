@@ -17,12 +17,17 @@ def solve(mat, mesh, packing=1., itermax=1000,
     It solves the *quadratic programming problem*:
 
     .. MATH::
-        \min_{\mathbf{u}, \mathbf{f}} \left( \frac{1}{2} \, \mathbf{u} \, \mathbb{K} \, \mathbf{u} - \mathbf{F} \, \mathbf{u} - \mathbf{f} \, (\mathbf{H} - \mathbb{C} \, \mathbf{u}) \right)
+        \min_{\mathbf{u}, \mathbf{f}} \left(
+            \frac{1}{2} \, \mathbf{u} \, \mathbb{K} \, \mathbf{u}
+            - \mathbf{F} \, \mathbf{u}
+            - \mathbf{f} \, (\mathbf{H} - \mathbb{C} \, \mathbf{u})
+        \right)
     .. MATH::
         \quad s.t. \quad \mathbb{C} \, \mathbf{u} \leq \mathbf{H} \, ,
         \quad \mathbf{u} \leq 0 \, ,
         \quad \mathbf{f} \geq 0
-        \quad and \quad \mathbf{f} \, (\mathbf{H} - \mathbb{C} \, \mathbf{u}) = 0
+        \quad and
+        \quad \mathbf{f} \, (\mathbf{H} - \mathbb{C} \, \mathbf{u}) = 0
 
     where:
         - 𝐮 is the vector of generalized displacements (*unknowns of the problem*).
@@ -89,7 +94,9 @@ def solve(mat, mesh, packing=1., itermax=1000,
     Other Parameters
     ----------------
     solve : callable, optional
-        Sparse solver. It is a callable object that takes as inputs a sparse symmetric matrix 𝔸 and a vector 𝐛 and returns the solution 𝐱 of the linear system: 𝔸 𝐱 = 𝐛. Default is `scipy.sparse.linalg.spsolve`.
+        Sparse solver. It is a callable object that takes as inputs a sparse
+        symmetric matrix 𝔸 and a vector 𝐛 and returns the solution 𝐱 of the
+        linear system: 𝔸 𝐱 = 𝐛. Default is `scipy.sparse.linalg.spsolve`.
     perm : numpy.ndarray, optional
         Permutation of indices.
     tol : float, optional
@@ -238,7 +245,7 @@ if __name__ == "__main__":
     if len(mesh):
         # Draw elements
         for i, j, k in tqdm(zip(mesh.index, mesh.beam, mesh.constraint),
-                            total=len(mesh)):
+                            total=len(mesh), desc="Draw mesh"):
             # Get element data
             a, b, c = mesh.iloc[[i, j, k]][[*"xyz"]].values
             if mesh.iloc[i].s < mesh.iloc[j].s:

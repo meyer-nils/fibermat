@@ -37,7 +37,9 @@ def stiffness(mat, mesh, lmin=None, lmax=None, coupling=1.0, **kwargs):
         - 𝐺 is the shear modulus.
         - 𝑏 and h are the width and thickness of the fiber.
 
-    The displacement vector :math:`\mathbf{u} = (\dots, u_i, \theta_i, \dots)` (with 𝑢ᵢ being the vertical displacement and θᵢ the rotation of the cross-section of the i-th node) satisfies **mechanical equilibrium**:
+    The displacement vector :math:`\mathbf{u} = (\dots, u_i, \theta_i, \dots)`
+    (with 𝑢ᵢ being the vertical displacement and θᵢ the rotation of the cross-section of the i-th node)
+    satisfies **mechanical equilibrium**:
 
     .. MATH::
         \mathbb{K} \, \mathbf{u} = \mathbf{F}
@@ -207,7 +209,8 @@ def constraint(mat, mesh, **kwargs):
         - :math:`z_A` and :math:`z_B` are the vertical positions of nodes A and B.
         - :math:`h_A` and :math:`h_B` are the fiber thicknesses at nodes A and B.
 
-    The vector 𝐟 is the vector of Lagrangian multipliers that corresponds to contact forces. It satisfies **KKT conditions**:
+    The vector 𝐟 is the vector of Lagrangian multipliers that corresponds to contact forces.
+    It satisfies **KKT conditions**:
 
     .. MATH::
         \mathbb{C} \, \mathbf{u} \leq \mathbf{H} \, ,
@@ -301,7 +304,7 @@ def constraint(mat, mesh, **kwargs):
 
 
 def plot_system(K, u, F, du, dF, C, f, H, df, dH,
-                solve=sp.sparse.linalg.spsolve, perm=None, ax=None, tol=1e-6):
+                solve=sp.sparse.linalg.spsolve, perm=None, tol=1e-6, ax=None):
     """
     Visualize the system of equations and calculate the step error.
 
@@ -336,13 +339,15 @@ def plot_system(K, u, F, du, dF, C, f, H, df, dH,
     Other Parameters
     ----------------
     solve : callable, optional
-        Sparse solver. It is a callable object that takes as inputs a sparse symmetric matrix 𝔸 and a vector 𝒃 and returns the solution 𝒙 of the linear system: 𝔸 𝒙 = 𝒃. Default is `scipy.sparse.linalg.spsolve`.
+        Sparse solver. It is a callable object that takes as inputs a sparse
+        symmetric matrix 𝔸 and a vector 𝒃 and returns the solution 𝒙 of the
+        linear system: 𝔸 𝒙 = 𝒃. Default is `scipy.sparse.linalg.spsolve`.
     perm : numpy.ndarray, optional
         Permutation of indices.
-    ax : matplotlib.axes.Axes, optional
-        Matplotlib axes.
     tol : float, optional
         Tolerance used for contact detection (mm). Default is 1e-6 mm.
+    ax : matplotlib.axes.Axes, optional
+        Matplotlib axes.
 
     """
     # Assemble the quadratic programming system
@@ -430,9 +435,9 @@ if __name__ == "__main__":
     # Generate a set of fibers
     mat = Mat(100)
     # Build the fiber network
-    net = Net(mat, periodic=True)
+    net = Net(mat)
     # Stack fibers
-    stack = Stack(mat, net, threshold=10)
+    stack = Stack(mat, net)
     # Create the fiber mesh
     mesh = Mesh(stack)
 

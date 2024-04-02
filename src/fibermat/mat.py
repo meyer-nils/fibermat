@@ -281,7 +281,7 @@ class Mat(pd.DataFrame):
 
         .. TIP::
             - If `self` is None, it returns an empty :class:`Mat` object.
-            - If a "skip_check" flag is True in :attr:`attrs`, the check is passed.
+            - If a `"skip_check"` flag is True in :attr:`attrs`, the check is passed.
 
         """
         if self is None:
@@ -364,7 +364,7 @@ if __name__ == "__main__":
     ax.view_init(azim=45, elev=30, roll=0)
     if len(mat):
         # Draw fibers
-        for i in tqdm(range(len(mat))):
+        for i in tqdm(range(len(mat)), desc="Draw fibers"):
             # Get fiber data
             fiber = mat.iloc[i]
             # Calculate fiber end points

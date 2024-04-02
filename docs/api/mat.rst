@@ -35,7 +35,7 @@ Example
     ax.view_init(azim=45, elev=30, roll=0)
     if len(mat):
         # Draw fibers
-        for i in tqdm(range(len(mat))):
+        for i in tqdm(range(len(mat)), desc="Draw fibers"):
             # Get fiber data
             fiber = mat.iloc[i]
             # Calculate fiber end points

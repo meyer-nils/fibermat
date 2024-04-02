@@ -324,7 +324,7 @@ class Net(pd.DataFrame):
 
         .. TIP::
             - If `self` is None, it returns an empty :class:`Net` object.
-            - If a "skip_check" flag is True in :attr:`attrs`, the check is passed.
+            - If a `"skip_check"` flag is True in :attr:`attrs`, the check is passed.
 
         """
         if self is None:
@@ -386,7 +386,9 @@ class Stack(Net):
     It solves the *linear programming system*:
 
     .. MATH::
-        \min_{z} (-\mathbf{f} \cdot \mathbf{z}) \quad s.t. \quad \mathbb{C} \, \mathbf{z} \leq \mathbf{H} \quad and \quad \mathbf{z} \geq \mathbf{h} / 2
+        \min_{z} (-\mathbf{f} \cdot \mathbf{z})
+        \quad s.t. \quad \mathbb{C} \, \mathbf{z} \leq \mathbf{H}
+        \quad and \quad \mathbf{z} \geq \mathbf{h} / 2
     .. MATH::
         with \quad \mathbf{f} = -\mathbf{m} \, g \quad and \quad \mathbf{h} > 0
 
@@ -400,7 +402,8 @@ class Stack(Net):
     *Non-penetration conditions* between two fibers give the expressions of rows of ℂ and 𝐇:
 
     .. MATH::
-        z_B - z_A \geq (h_A + h_B) \, / \, 2 \quad \Leftrightarrow \quad z_A - z_B \leq - (h_A + h_B) \, / \, 2
+        z_B - z_A \geq (h_A + h_B) \, / \, 2
+        \quad \Leftrightarrow \quad z_A - z_B \leq - (h_A + h_B) \, / \, 2
 
     Parameters
     ----------
@@ -643,7 +646,7 @@ class Stack(Net):
 
         .. TIP::
             - If `self` is None, it returns an empty :class:`Stack` object.
-            - If a "skip_check" flag is True in :attr:`attrs`, the check is passed.
+            - If a `"skip_check"` flag is True in :attr:`attrs`, the check is passed.
 
         """
         if self is None:
@@ -710,7 +713,9 @@ class Stack(Net):
         Assemble the linear system:
 
         .. MATH::
-            \min_{z} (-\mathbf{f} \cdot \mathbf{z}) \quad s.t. \quad \mathbb{C} \, \mathbf{z} \leq \mathbf{H} \quad and \quad \mathbf{z} \geq \mathbf{h} / 2
+            \min_{z} (-\mathbf{f} \cdot \mathbf{z})
+            \quad s.t. \quad \mathbb{C} \, \mathbf{z} \leq \mathbf{H}
+            \quad and \quad \mathbf{z} \geq \mathbf{h} / 2
         .. MATH::
             with \quad \mathbf{f} = -\mathbf{m} \, g \quad and \quad \mathbf{h} > 0
 
@@ -818,7 +823,7 @@ if __name__ == "__main__":
     ax.view_init(azim=45, elev=30, roll=0)
     if len(mat):
         # Draw fibers
-        for i in tqdm(range(len(mat))):
+        for i in tqdm(range(len(mat)), desc="Draw fibers"):
             # Get fiber data
             fiber = mat.iloc[i]
             # Calculate fiber end points
@@ -827,7 +832,7 @@ if __name__ == "__main__":
             plt.plot(*np.c_[A, B], c=cmap(color(load[i])))
     if len(points):
         # Draw contacts
-        for point in tqdm(points[~np.isclose(force, 0)]):
+        for point in tqdm(points[~np.isclose(force, 0)], desc="Draw nodes"):
             plt.plot(*point.T, '--ok', lw=1, mfc='none', ms=3, alpha=0.2)
     # Set drawing box dimensions
     ax.set_xlim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])

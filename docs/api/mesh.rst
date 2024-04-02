@@ -35,7 +35,7 @@ Example
     if len(mesh):
         # Draw elements
         for i, j, k in tqdm(zip(mesh.index, mesh.beam, mesh.constraint),
-                            total=len(mesh)):
+                            total=len(mesh), desc="Draw mesh"):
             # Get element data
             a, b, c = mesh.iloc[[i, j, k]][[*"xyz"]].values
             if mesh.iloc[i].s < mesh.iloc[j].s:
@@ -49,10 +49,10 @@ Example
             if mesh.iloc[i].fiber == mesh.iloc[k].fiber:
                 # Draw fiber end nodes
                 plt.plot(*np.c_[a, c], '+k', ms=3, alpha=0.2)
-        # Set drawing box dimensions
-        ax.set_xlim(-0.5 * mesh.attrs["size"], 0.5 * mesh.attrs["size"])
-        ax.set_ylim(-0.5 * mesh.attrs["size"], 0.5 * mesh.attrs["size"])
-        plt.show()
+    # Set drawing box dimensions
+    ax.set_xlim(-0.5 * mesh.attrs["size"], 0.5 * mesh.attrs["size"])
+    ax.set_ylim(-0.5 * mesh.attrs["size"], 0.5 * mesh.attrs["size"])
+    plt.show()
 
 .. image:: ../../images/mesh.png
     :width: 640

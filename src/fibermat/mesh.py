@@ -248,7 +248,7 @@ class Mesh(pd.DataFrame):
 
         .. TIP::
             - If `self` is None, it returns an empty :class:`Mesh` object.
-            - If a "skip_check" flag is True in :attr:`attrs`, the check is passed.
+            - If a `"skip_check"` flag is True in :attr:`attrs`, the check is passed.
 
         """
         if self is None:
@@ -352,7 +352,7 @@ if __name__ == "__main__":
     if len(mesh):
         # Draw elements
         for i, j, k in tqdm(zip(mesh.index, mesh.beam, mesh.constraint),
-                            total=len(mesh)):
+                            total=len(mesh), desc="Draw mesh"):
             # Get element data
             a, b, c = mesh.iloc[[i, j, k]][[*"xyz"]].values
             if mesh.iloc[i].s < mesh.iloc[j].s:

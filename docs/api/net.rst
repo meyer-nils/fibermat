@@ -38,21 +38,27 @@ Example
     ax.view_init(azim=45, elev=30, roll=0)
     if len(mat):
         # Draw fibers
-        for i in tqdm(range(len(mat))):
+        for i in tqdm(range(len(mat)), desc="Draw fibers"):
             # Get fiber data
             fiber = mat.iloc[i]
             # Calculate fiber end points
             A = fiber[[*"xyz"]].values - 0.5 * fiber.l * fiber[[*"uvw"]].values
             B = fiber[[*"xyz"]].values + 0.5 * fiber.l * fiber[[*"uvw"]].values
-            plt.plot(*np.c_[A, B])
-    if len(net):
-        # Draw nodes
-        for point in tqdm(points):
+            plt.plot(*np.c_[A, B], c=cmap(color(load[i])))
+    if len(points):
+        # Draw contacts
+        for point in tqdm(points[~np.isclose(force, 0)], desc="Draw nodes"):
             plt.plot(*point.T, '--ok', lw=1, mfc='none', ms=3, alpha=0.2)
     # Set drawing box dimensions
-    ax.set_xlim(-0.5 * net.attrs["size"], 0.5 * net.attrs["size"])
-    ax.set_ylim(-0.5 * net.attrs["size"], 0.5 * net.attrs["size"])
+    ax.set_xlim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])
+    ax.set_ylim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])
+    # Add a color bar
+    norm = plt.Normalize(vmin=np.min(load), vmax=np.max(load))
+    smap = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    cbar = plt.colorbar(smap, ax=ax)
+    cbar.set_label("Load / $mg$ ($N\,/\,N$)")
     plt.show()
+
 
 .. image:: ../../images/net.png
     :width: 640

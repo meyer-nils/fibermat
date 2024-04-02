@@ -8,7 +8,8 @@ from scipy.interpolate import interp1d
 
 class Interpolate(interp1d):
     """
-    A class for interpolating array values inherited from `scipy.interpolate.interp1d <https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html>`_.
+    A class for interpolating array values inherited from `scipy.interpolate.interp1d
+    <https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html>`_.
 
     Parameters
     ----------
@@ -24,8 +25,6 @@ class Interpolate(interp1d):
 
     Attributes
     ----------
-    x : array-like
-        Interpolation parameter.
     t : array-like
         Interpolation parameter between 0 and 1.
     dtype : type
@@ -42,7 +41,7 @@ class Interpolate(interp1d):
 
     def __init__(self, y, size=None, **kwargs):
         """
-        Initialize an Interpolation object.
+        Initialize an `Interpolation` object.
 
         Parameters
         ----------

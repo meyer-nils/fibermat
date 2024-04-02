@@ -59,7 +59,11 @@ Example
     # Assembly quadratic programming system
     K, u, F, du, dF = stiffness(mat, mesh)
     C, f, H, df, dH = constraint(mat, mesh)
-    plot_system(K, u, F, du, dF, C, f, H, df, dH)
+    P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
+    # Permutation of indices
+    # perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
+    # Visualize the system
+    plot_system(K, u, F, du, dF, C, f, H, df, dH, perm=None)
     plt.show()
 
 .. code-block::

@@ -27,7 +27,8 @@ Example
 
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
-        mat, mesh, packing=4, lmin=0.01, coupling=0.99
+        mat, mesh, packing=4, itermax=1000,
+        lmin=0.01, coupling=0.99, interp_size=100
     )
 
     # Deform the mesh
@@ -40,7 +41,7 @@ Example
     if len(mesh):
         # Draw elements
         for i, j, k in tqdm(zip(mesh.index, mesh.beam, mesh.constraint),
-                            total=len(mesh)):
+                            total=len(mesh), desc="Draw mesh"):
             # Get element data
             a, b, c = mesh.iloc[[i, j, k]][[*"xyz"]].values
             if mesh.iloc[i].s < mesh.iloc[j].s:

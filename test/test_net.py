@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from fibermat import Mat, Net, Stack
+from fibermat import *
 
 
 def equal(df1, df2):

@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 from fibermat import Mat, Net, Mesh
 
 
@@ -31,7 +32,6 @@ def test_emptyMesh():
     Test the initialization of an empty `Mesh` object.
 
     """
-    # Optional
     mesh = pd.DataFrame(data=[], index=[], columns=["fiber", "s", "x", "y", "z", "beam", "constraint"], dtype=float)
     mesh[["fiber", "beam", "constraint"]] = mesh[["fiber", "beam", "constraint"]].astype(int)
     mesh.attrs = dict(n=0, size=50., periodic=True)
@@ -47,7 +47,6 @@ def test_Mesh():
     Test the initialization of a `Mesh` object.
 
     """
-    # Optional
     data = np.array([
         [0., -12.5       ,  -6.7929597 ,  23.01180748, -19.08627871,  1.,  0.],
         [0.,  -8.06427839,  -3.51633299,  20.02193397, -19.08627871,  2., 12.],

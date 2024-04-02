@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 from fibermat import Mat
 
 
@@ -31,7 +32,6 @@ def test_emptyMat():
     Test the initialization of an empty `Mat` object.
 
     """
-    # Optional
     mat = pd.DataFrame(data=[], index=[], columns=[*"lbhxyzuvwGE"], dtype=float)
     mat.attrs = dict(n=0, size=50.)
     equal(Mat(), mat)
@@ -46,7 +46,6 @@ def test_Mat():
     Test the initialization of a `Mat` object.
 
     """
-    # Optional
     data = np.array([
         [ 25., 1., 1.,  2.4406752 ,  14.5862519 , -19.08627871, 0.73869079, -0.67404445, -0., 1., np.inf],
         [ 25., 1., 1., 10.75946832,   1.44474599, -17.83233563, 0.65127679,  0.75884026, -0., 1., np.inf],

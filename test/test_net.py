@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 from fibermat import Mat, Net, Stack
 
 
@@ -31,7 +32,6 @@ def test_emptyNet():
     Test the initialization of an empty `Net` object.
 
     """
-    # Optional
     net = pd.DataFrame(data=[], index=[], columns=["A", "B", "sA", "sB", "xA", "yA", "zA", "xB", "yB", "zB"], dtype=float)
     net[[*"AB"]] = net[[*"AB"]].astype(int)
     net.attrs = dict(n=0, size=50., periodic=True)
@@ -47,7 +47,6 @@ def test_Net():
     Test the initialization of a `Net` object.
 
     """
-    # Optional
     data = np.array([
         [0., 0.,  12.5      , -12.5       , 11.67431009,   6.16069633, -19.08627871,  -6.7929597 ,  23.01180748, -19.08627871],
         [0., 3., -8.06427839,  -5.89623413, -3.51633299,  20.02193397, -19.08627871,  -3.51633299,  20.02193397,  -1.92603189],
@@ -85,7 +84,6 @@ def test_emptyStack():
     Test the initialization of an empty `Stack` object.
 
     """
-    # Optional
     stack = pd.DataFrame(data=[], index=[], columns=["A", "B", "sA", "sB", "xA", "yA", "zA", "xB", "yB", "zB"], dtype=float)
     stack[[*"AB"]] = stack[[*"AB"]].astype(int)
     stack.attrs = dict(n=0, size=50., periodic=True)
@@ -101,7 +99,6 @@ def test_Stack():
     Test the initialization of a `Stack` object.
 
     """
-    # Optional
     data = np.array([
         [0., 0., 12.5       , -12.5       , 11.67431009,   6.16069633, 0.5,  -6.7929597 ,  23.01180748, 0.5],
         [0., 3., -8.06427839,  -5.89623413, -3.51633299,  20.02193397, 0.5,  -3.51633299,  20.02193397, 1.5],

@@ -7,7 +7,7 @@ interpolate
 .. image:: ../../images/interpolate.png
     :width: 640
 
-.. autoclass:: fibermat.interpolation.Interpolate
+.. autoclass:: fibermat.utils.interpolation.Interpolate
     :members: __call__
 
 Example

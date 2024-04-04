@@ -787,7 +787,7 @@ class Stack(Net):
 
 if __name__ == "__main__":
 
-    # from fibermat import *
+    from fibermat import *
 
     # Generate a set of fibers
     mat = Mat(10)

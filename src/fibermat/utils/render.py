@@ -8,7 +8,7 @@ from scipy.interpolate import CubicHermiteSpline
 from sklearn.neighbors import KDTree
 from tqdm import tqdm
 
-from fibermat import Mat, Net, Stack, Mesh, solve
+from fibermat import Mat, Mesh
 
 
 def vtk_fiber(length=25., width=1., thickness=1., x=0., y=0., z=0.,
@@ -285,15 +285,15 @@ def vtk_mesh(mat=None, mesh=None,
 
 if __name__ == "__main__":
 
-    # from fibermat import *
+    from fibermat import *
 
     # Create a VTK fiber
     vtk_fiber().plot()
 
     # Generate a set of fibers
-    mat = Mat(100)
+    mat = Mat(10)
     # Build the fiber network
-    net = Net(mat, periodic=True)
+    net = Net(mat, periodic=False)
     # Stack fibers
     stack = Stack(mat, net)
     # Create the fiber mesh

@@ -7,7 +7,7 @@ vtk_fiber
 .. image:: ../../images/vtk_fiber.png
     :width: 640
 
-.. autofunction:: fibermat.render.vtk_fiber
+.. autofunction:: fibermat.utils.render.vtk_fiber
 
 vtk_mat
 ~~~~~~~
@@ -15,7 +15,7 @@ vtk_mat
 .. image:: ../../images/vtk_mat.png
     :width: 640
 
-.. autofunction:: fibermat.render.vtk_mat
+.. autofunction:: fibermat.utils.render.vtk_mat
 
 vtk_mesh
 ~~~~~~~~
@@ -23,7 +23,7 @@ vtk_mesh
 .. image:: ../../images/vtk_mesh.png
     :width: 640
 
-.. autofunction:: fibermat.render.vtk_mesh
+.. autofunction:: fibermat.utils.render.vtk_mesh
 
 Example
 ~~~~~~~

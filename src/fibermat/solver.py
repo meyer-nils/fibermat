@@ -7,7 +7,8 @@ import warnings
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from fibermat import Mat, Net, Stack, Mesh, stiffness, constraint, Interpolate
+from fibermat import stiffness, constraint
+from fibermat.utils.interpolation import Interpolate
 
 
 def solve(mat, mesh, packing=1., itermax=1000,
@@ -218,10 +219,10 @@ def solve(mat, mesh, packing=1., itermax=1000,
 
 if __name__ == "__main__":
 
-    # from fibermat import *
+    from fibermat import *
 
     # Generate a set of fibers
-    mat = Mat(100)
+    mat = Mat(10)
     # Build the fiber network
     net = Net(mat)
     # Stack fibers

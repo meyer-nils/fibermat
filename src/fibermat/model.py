@@ -6,7 +6,7 @@ import scipy as sp
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
 
-from fibermat import Mat, Net, Stack, Mesh
+from fibermat import Mat, Mesh
 
 
 def stiffness(mat, mesh, lmin=None, lmax=None, coupling=1.0, **kwargs):
@@ -406,7 +406,7 @@ def plot_system(K, u, F, du, dF, C, f, H, df, dH,
 
 if __name__ == "__main__":
 
-    # from fibermat import *
+    from fibermat import *
 
     # Linear model (Ψ² ≫ 1)
     mat = Mat(1, length=1, width=1, thickness=1, shear=1, tensile=np.inf)

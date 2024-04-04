@@ -94,7 +94,7 @@ class Interpolate(interp1d):
 
 if __name__ == "__main__":
 
-    # from fibermat import *
+    from fibermat import *
 
     # Reference solution
     x = np.linspace(0, 10, 1001)

@@ -3,13 +3,22 @@
 
 Models are stored in the directory `fibermat.model`.
 
+Degrees of Freedom
+~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: fibermat.model.timoshenko.displacement
+.. autofunction:: fibermat.model.timoshenko.rotation
+
+Mechanical model
+~~~~~~~~~~~~~~~~
+
 stiffness
-~~~~~~~~~
+---------
 
 .. autofunction:: fibermat.model.timoshenko.stiffness
 
 constraint
-~~~~~~~~~~
+----------
 
 .. autofunction:: fibermat.model.timoshenko.constraint
 

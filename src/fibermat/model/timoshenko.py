@@ -9,6 +9,24 @@ from scipy.interpolate import interp1d
 from fibermat import Mat, Mesh
 
 
+################################################################################
+# Degrees of Freedom
+################################################################################
+
+def displacement(u):
+    """ Return nodal displacements."""
+    return u[..., ::2]
+
+
+def rotation(u):
+    """ Return nodal rotations."""
+    return u[..., 1::2]
+
+
+################################################################################
+# Mechanical model
+################################################################################
+
 def stiffness(mat, mesh, lmin=None, lmax=None, coupling=1.0, **kwargs):
     r"""
     Assemble the quadratic system to be minimized.

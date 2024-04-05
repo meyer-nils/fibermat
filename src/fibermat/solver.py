@@ -113,7 +113,6 @@ def solve(mat, mesh, packing=1., itermax=1000,
 
     """
     # Assemble the quadratic programming system
-    # TODO: pass a model as argument instead
     K, u, F, du, dF = stiffness(mat, mesh, **kwargs)
     C, f, H, df, dH = constraint(mat, mesh, **kwargs)
     P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
@@ -334,7 +333,7 @@ if __name__ == "__main__":
     )
 
     # Deform the mesh
-    mesh.z += u(1)[::2]
+    mesh.z += displacement(u(1))
 
     # Figure
     fig, ax = plt.subplots(subplot_kw=dict(projection='3d', aspect='equal',

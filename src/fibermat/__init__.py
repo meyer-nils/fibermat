@@ -63,6 +63,7 @@ from fibermat.mat import *
 from fibermat.net import *
 from fibermat.mesh import *
 from fibermat.solver import *
+from fibermat.model.timoshenko import *
 from fibermat.utils import *
 
 __author__ = "François Mahé"

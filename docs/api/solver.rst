@@ -39,7 +39,7 @@ Example
     )
 
     # Deform the mesh
-    mesh.z += u(1)[::2]
+    mesh.z += displacement(u(1))
 
     # Figure
     fig, ax = plt.subplots(subplot_kw=dict(projection='3d', aspect='equal',

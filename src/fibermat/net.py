@@ -730,7 +730,7 @@ class Stack(Net):
         -------
             C : sparse matrix
                 Constraint matrix.
-            f : numpy.ndarray
+            mg : numpy.ndarray
                 Force vector.
             H : numpy.ndarray
                 Upper-bound vector.
@@ -773,12 +773,12 @@ class Stack(Net):
                                  shape=(1 * len(net[mask]), 1 * len(mat)))
 
         # Initialize 𝒇 and 𝑯 vectors
-        f = np.pi / 4 * mat[[*"lbh"]].prod(axis=1)  # : potential field
+        mg = np.pi / 4 * mat[[*"lbh"]].prod(axis=1)  # : potential field
         H = np.zeros(C.shape[0])
         # X₂ - X₁ ≥ ½(h₁ + h₂) ⟺ X₁ - X₂ ≤ -½(h₁ + h₂)
         H -= 0.5 * (h[i] + h[j])
 
-        return C, f, H, h
+        return C, mg, H, h
 
 
 ################################################################################
@@ -797,13 +797,12 @@ if __name__ == "__main__":
     stack = Stack(mat, net)
 
     # Get the linear system
-    C, f, H, h = Stack.constraint(mat, net)
+    C, mg, H, h = Stack.constraint(mat, net)
     linsol = Stack.solve(mat, net)
     # Contact force
-    # TODO: change name "force"
-    force = linsol.ineqlin.marginals
+    f = linsol.ineqlin.marginals
     # Resulting force
-    load = 0.5 * force @ np.abs(C) + 0.5 * force @ C
+    load = 0.5 * f @ np.abs(C) + 0.5 * f @ C
 
     # Check data
     Stack.check(stack)  # or `stack.check()`
@@ -833,7 +832,7 @@ if __name__ == "__main__":
             plt.plot(*np.c_[A, B], c=cmap(color(load[i])))
     if len(points):
         # Draw contacts
-        for point in tqdm(points[~np.isclose(force, 0)], desc="Draw nodes"):
+        for point in tqdm(points[~np.isclose(f, 0)], desc="Draw nodes"):
             plt.plot(*point.T, '--ok', lw=1, mfc='none', ms=3, alpha=0.2)
     # Set drawing box dimensions
     ax.set_xlim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])

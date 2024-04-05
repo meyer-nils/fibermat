@@ -28,6 +28,14 @@ Example
     points = (net[["xA", "yA", "zA", "xB", "yB", "zB"]]
               .values.reshape(-1, 2, 3))  # size: (n x 2 x 3)
 
+    # Get the linear system
+    C, mg, H, h = Stack.constraint(mat, net)
+    linsol = Stack.solve(mat, net)
+    # Contact force
+    f = linsol.ineqlin.marginals
+    # Resulting force
+    load = 0.5 * f @ np.abs(C) + 0.5 * f @ C
+
     # Check data
     Net.check(net)  # or `net.check()`
     # -> returns True if correct, otherwise it raises an error.
@@ -47,7 +55,7 @@ Example
             plt.plot(*np.c_[A, B], c=cmap(color(load[i])))
     if len(points):
         # Draw contacts
-        for point in tqdm(points[~np.isclose(force, 0)], desc="Draw nodes"):
+        for point in tqdm(points[~np.isclose(f, 0)], desc="Draw nodes"):
             plt.plot(*point.T, '--ok', lw=1, mfc='none', ms=3, alpha=0.2)
     # Set drawing box dimensions
     ax.set_xlim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])

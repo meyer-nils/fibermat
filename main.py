@@ -77,12 +77,12 @@ if __name__ == "__main__":
     # Create the fiber mesh
     mesh = Mesh(stack)
 
-    # # Assemble the quadratic programming system
-    # K, u, F, du, dF = stiffness(mat, mesh)
-    # C, f, H, df, dH = constraint(mat, mesh)
-    # P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
-    # # Permutation of indices
-    # perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
+    # Assemble the quadratic programming system
+    K, u, F, du, dF = stiffness(mat, mesh)
+    C, f, H, df, dH = constraint(mat, mesh)
+    P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
+    # Permutation of indices
+    perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
     # Enhanced solver
     spsolve = lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=False)
     # # Visualize the system

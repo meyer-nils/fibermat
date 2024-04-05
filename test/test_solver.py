@@ -8,9 +8,9 @@ from fibermat import *
 # Tests
 ################################################################################
 
-def test_model():
+def test_solver():
     """
-    Test the model for a problem of 3 fibers.
+    Test the solver for a problem of 3 fibers.
 
     """
     mat = Mat(3)
@@ -53,7 +53,7 @@ def test_model():
 
 if __name__ == '__main__':
 
-    test_model()
+    test_solver()
 
     mat = Mat(3)
     mat.x = -5, 0, 5

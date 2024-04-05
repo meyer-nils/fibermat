@@ -1,20 +1,17 @@
 🔧 Model
 ========
 
+Models are stored in the directory `fibermat.model`.
+
 stiffness
 ~~~~~~~~~
 
-.. autofunction:: fibermat.model.stiffness
+.. autofunction:: fibermat.model.timoshenko.stiffness
 
 constraint
 ~~~~~~~~~~
 
-.. autofunction:: fibermat.model.constraint
-
-plot_system
-~~~~~~~~~~~
-
-.. autofunction:: fibermat.model.plot_system
+.. autofunction:: fibermat.model.timoshenko.constraint
 
 Example
 ~~~~~~~
@@ -56,14 +53,16 @@ Example
     # Create the fiber mesh
     mesh = Mesh(stack)
 
-    # Assembly quadratic programming system
+    # Assemble the quadratic programming system
     K, u, F, du, dF = stiffness(mat, mesh)
     C, f, H, df, dH = constraint(mat, mesh)
     P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
     # Permutation of indices
-    # perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
+    perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
     # Visualize the system
-    plot_system(K, u, F, du, dF, C, f, H, df, dH, perm=None)
+    fig, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
+    plot_system(K, u, F, du, dF, C, f, H, df, dH, perm=None, ax=ax[0])
+    plot_system(K, u, F, du, dF, C, f, H, df, dH, perm=perm, ax=ax[1])
     plt.show()
 
 .. code-block::
@@ -89,4 +88,4 @@ Example
     2.888979232532619e-13
 
 .. image:: ../../images/system.png
-    :width: 640
+    :width: 1280

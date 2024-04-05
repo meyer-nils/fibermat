@@ -82,6 +82,8 @@ def stiffness(mat, mesh, lmin=None, lmax=None, coupling=1.0, **kwargs):
 
     :Use:
 
+        >>> from fibermat import *
+
         >>> # Linear model (Ψ² ≫ 1)
         >>> mat = Mat(1, length=1, width=1, thickness=1, shear=1, tensile=np.inf)
         >>> net = Net(mat)

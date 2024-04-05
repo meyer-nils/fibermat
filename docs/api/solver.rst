@@ -9,6 +9,13 @@ solve
 
 .. autofunction:: fibermat.solver.solve
 
+plot_system
+~~~~~~~~~~~
+
+.. autofunction:: fibermat.solver.plot_system
+
+.. note:: Example of use in :ref:`🔧 Model`.
+
 Example
 ~~~~~~~
 

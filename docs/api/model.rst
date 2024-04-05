@@ -8,6 +8,8 @@ Degrees of Freedom
 
 .. autofunction:: fibermat.model.timoshenko.displacement
 .. autofunction:: fibermat.model.timoshenko.rotation
+.. autofunction:: fibermat.model.timoshenko.force
+.. autofunction:: fibermat.model.timoshenko.torque
 
 Mechanical model
 ~~~~~~~~~~~~~~~~

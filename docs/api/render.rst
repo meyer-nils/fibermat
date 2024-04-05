@@ -59,8 +59,11 @@ Example
     )
 
     # Export as VTK
-    msh = vtk_mesh(mat, mesh, displacement(u(1)), rotation(u(1)),
-                   *(f(1) @ C).reshape(-1, 2).T)
+    msh = vtk_mesh(
+        mat, mesh,
+        displacement(u(1)), rotation(u(1)),
+        force(f(1) @ C), torque(f(1) @ C)
+    )
     msh.plot(scalars="force", cmap=plt.cm.twilight_shifted)
 
 .. image:: ../../images/vtk_force.png

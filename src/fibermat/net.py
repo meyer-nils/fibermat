@@ -800,6 +800,7 @@ if __name__ == "__main__":
     C, f, H, h = Stack.constraint(mat, net)
     linsol = Stack.solve(mat, net)
     # Contact force
+    # TODO: change name "force"
     force = linsol.ineqlin.marginals
     # Resulting force
     load = 0.5 * force @ np.abs(C) + 0.5 * force @ C

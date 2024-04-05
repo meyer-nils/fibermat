@@ -11,7 +11,7 @@ from fibermat.model.timoshenko import stiffness, constraint
 from fibermat.utils.interpolation import Interpolate
 
 
-def solve(mat, mesh, packing=1., itermax=1000,
+def solve(mesh, stiffness, constraint, packing=1., itermax=1000,
           solve=sp.sparse.linalg.spsolve, perm=None, tol=1e-6,
           errtol=1e-6, interp_size=None, verbose=True, **kwargs):
     r"""An iterative mechanical solver for fiber packing problems.
@@ -56,10 +56,30 @@ def solve(mat, mesh, packing=1., itermax=1000,
 
     Parameters
     ----------
-    mat : pandas.DataFrame
-        Set of fibers represented by a :class:`Mat` object.
-    mesh : pandas.DataFrame
+    mesh : pandas.DataFrame, optional
         Fiber mesh represented by a :class:`Mesh` object.
+    stiffness : tuple
+        K : sparse matrix
+            Stiffness matrix (symmetric positive-semi definite).
+        u : numpy.ndarray
+            Displacement vector.
+        F : numpy.ndarray
+            Load vector.
+        du : numpy.ndarray
+            Incremental displacement vector.
+        dF : numpy.ndarray
+            Incremental load vector.
+    constraint : tuple
+        C : sparse matrix
+            Constraint matrix.
+        f : numpy.ndarray
+            Force vector.
+        H : numpy.ndarray
+            Upper-bound vector.
+        df : numpy.ndarray
+            Incremental force vector.
+        dH : numpy.ndarray
+            Incremental upper-bound vector.
     packing : float, optional
         Targeted value of packing. Must be greater than 1. Default is 1.0.
     itermax : int, optional
@@ -109,12 +129,16 @@ def solve(mat, mesh, packing=1., itermax=1000,
     verbose : bool, optional
         If True, a progress bar is displayed. Default is True.
     kwargs :
-        Additional keyword arguments passed to matrix constructors.
+        Additional keyword arguments ignored by the function.
 
     """
+    # Optional
+    if mesh is None:
+        mesh = Mesh()
+
     # Assemble the quadratic programming system
-    K, u, F, du, dF = stiffness(mat, mesh, **kwargs)
-    C, f, H, df, dH = constraint(mat, mesh, **kwargs)
+    K, u, F, du, dF = stiffness
+    C, f, H, df, dH = constraint
     P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
     x = np.r_[u, f]
     q = np.r_[F, H]
@@ -212,33 +236,35 @@ def solve(mat, mesh, packing=1., itermax=1000,
     return K, C, u, f, F, H, Z, rlambda, mask, err
 
 
-def plot_system(K, u, F, du, dF, C, f, H, df, dH,
+def plot_system(stiffness, constraint,
                 solve=sp.sparse.linalg.spsolve, perm=None, tol=1e-6, ax=None):
     """
     Visualize the system of equations and calculate the step error.
 
     Parameters
     ----------
-    K : sparse matrix
-        Stiffness matrix (symmetric positive-semi definite).
-    u : numpy.ndarray
-        Displacement vector.
-    F : numpy.ndarray
-        Load vector.
-    du : numpy.ndarray
-        Incremental displacement vector.
-    dF : numpy.ndarray
-        Incremental load vector.
-    C : sparse matrix
-        Constraint matrix.
-    f : numpy.ndarray
-        Force vector.
-    H : numpy.ndarray
-        Upper-bound vector.
-    df : numpy.ndarray
-        Incremental force vector.
-    dH : numpy.ndarray
-        Incremental upper-bound vector.
+    stiffness : tuple
+        K : sparse matrix
+            Stiffness matrix (symmetric positive-semi definite).
+        u : numpy.ndarray
+            Displacement vector.
+        F : numpy.ndarray
+            Load vector.
+        du : numpy.ndarray
+            Incremental displacement vector.
+        dF : numpy.ndarray
+            Incremental load vector.
+    constraint : tuple
+        C : sparse matrix
+            Constraint matrix.
+        f : numpy.ndarray
+            Force vector.
+        H : numpy.ndarray
+            Upper-bound vector.
+        df : numpy.ndarray
+            Incremental force vector.
+        dH : numpy.ndarray
+            Incremental upper-bound vector.
 
     Returns
     -------
@@ -260,6 +286,8 @@ def plot_system(K, u, F, du, dF, C, f, H, df, dH,
 
     """
     # Assemble the quadratic programming system
+    K, u, F, du, dF = stiffness
+    C, f, H, df, dH = constraint
     P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
     x = np.r_[u, f]
     q = np.r_[F, H]
@@ -328,8 +356,10 @@ if __name__ == "__main__":
 
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
-        mat, mesh, packing=4, itermax=1000,
-        lmin=0.01, coupling=0.99, interp_size=100
+        mesh,
+        stiffness(mat, mesh),
+        constraint(mat, mesh),
+        packing=4,
     )
 
     # Deform the mesh

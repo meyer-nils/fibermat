@@ -87,21 +87,24 @@ if __name__ == "__main__":
     spsolve = lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=False)
     # # Visualize the system
     # fig, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
-    # plot_system(K, u, F, du, dF, C, f, H, df, dH, perm=None, ax=ax[0])
-    # plot_system(K, u, F, du, dF, C, f, H, df, dH, perm=perm, ax=ax[1])
+    # plot_system((K, u, F, du, dF), (C, f, H, df, dH), perm=None, ax=ax[0])
+    # plot_system((K, u, F, du, dF), (C, f, H, df, dH), perm=perm, ax=ax[1])
     # plt.show()
 
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
-        mat, mesh, packing=4, itermax=1000,
-        solve=spsolve, perm=perm,
-        lmin=0.01, coupling=0.99, interp_size=100,
+        mesh,
+        stiffness(mat, mesh),
+        constraint(mat, mesh),
+        packing=4,
+        solve=spsolve,
+        perm=perm,
     )
 
     # # Visualize the system
     # fig, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
-    # plot_system(K, u(0), F(0), du, dF, C, f(0), H(0), df, dH, ax=ax[0])
-    # plot_system(K, u(1), F(1), du, dF, C, f(1), H(1), df, dH, ax=ax[1])
+    # plot_system((K, u(0), F(0), du, dF), (C, f(0), H(0), df, dH), ax=ax[0])
+    # plot_system((K, u(1), F(1), du, dF), (C, f(1), H(1), df, dH), ax=ax[1])
     # plt.show()
 
     # Export as VTK

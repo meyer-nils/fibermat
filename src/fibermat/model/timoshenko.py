@@ -27,7 +27,7 @@ def rotation(u):
 # Mechanical model
 ################################################################################
 
-def stiffness(mat, mesh, lmin=None, lmax=None, coupling=1.0, **kwargs):
+def stiffness(mat, mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
     r"""
     Assemble the quadratic system to be minimized.
 
@@ -90,11 +90,11 @@ def stiffness(mat, mesh, lmin=None, lmax=None, coupling=1.0, **kwargs):
     Other Parameters
     ----------------
     lmin : float, optional
-        Lower bound used to rescale beam lengths (mm).
+        Lower bound used to rescale beam lengths (mm). Default is 0.01 mm.
     lmax : float, optional
         Upper bound used to rescale beam lengths (mm).
     coupling : float, optional
-        Coupling numerical constant between 0 and 1. Default is 1.0.
+        Coupling numerical constant between 0 and 1. Default is 0.99.
     kwargs :
         Additional keyword arguments ignored by the function.
 
@@ -372,6 +372,6 @@ if __name__ == "__main__":
     perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
     # Visualize the system
     fig, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
-    plot_system(K, u, F, du, dF, C, f, H, df, dH, perm=None, ax=ax[0])
-    plot_system(K, u, F, du, dF, C, f, H, df, dH, perm=perm, ax=ax[1])
+    plot_system((K, u, F, du, dF), (C, f, H, df, dH), perm=None, ax=ax[0])
+    plot_system((K, u, F, du, dF), (C, f, H, df, dH), perm=perm, ax=ax[1])
     plt.show()

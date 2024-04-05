@@ -62,7 +62,6 @@ Mahé, F. (2023). Statistical mechanical framework for discontinuous composites:
 from fibermat.mat import *
 from fibermat.net import *
 from fibermat.mesh import *
-from fibermat.model import *
 from fibermat.solver import *
 from fibermat.utils import *
 

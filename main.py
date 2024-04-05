@@ -77,17 +77,19 @@ if __name__ == "__main__":
     # Create the fiber mesh
     mesh = Mesh(stack)
 
-    # Assemble the quadratic programming system
-    K, u, F, du, dF = stiffness(mat, mesh)
-    C, f, H, df, dH = constraint(mat, mesh)
-    P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
-    # Permutation of indices
-    perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
+    # # Assemble the quadratic programming system
+    # K, u, F, du, dF = stiffness(mat, mesh)
+    # C, f, H, df, dH = constraint(mat, mesh)
+    # P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
+    # # Permutation of indices
+    # perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
     # Enhanced solver
     spsolve = lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=False)
-    # Visualize the system
-    plot_system(K, u, F, du, dF, C, f, H, df, dH, solve=spsolve, perm=perm)
-    plt.show()
+    # # Visualize the system
+    # fig, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
+    # plot_system(K, u, F, du, dF, C, f, H, df, dH, perm=None, ax=ax[0])
+    # plot_system(K, u, F, du, dF, C, f, H, df, dH, perm=perm, ax=ax[1])
+    # plt.show()
 
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
@@ -96,6 +98,7 @@ if __name__ == "__main__":
         lmin=0.01, coupling=0.99, interp_size=100,
     )
 
+    # # Visualize the system
     # fig, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
     # plot_system(K, u(0), F(0), du, dF, C, f(0), H(0), df, dH, ax=ax[0])
     # plot_system(K, u(1), F(1), du, dF, C, f(1), H(1), df, dH, ax=ax[1])

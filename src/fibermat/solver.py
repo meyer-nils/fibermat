@@ -7,7 +7,7 @@ import warnings
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from fibermat import stiffness, constraint
+from fibermat.model.timoshenko import stiffness, constraint
 from fibermat.utils.interpolation import Interpolate
 
 
@@ -211,6 +211,103 @@ def solve(mat, mesh, packing=1., itermax=1000,
 
     # Return interpolated results
     return K, C, u, f, F, H, Z, rlambda, mask, err
+
+
+def plot_system(K, u, F, du, dF, C, f, H, df, dH,
+                solve=sp.sparse.linalg.spsolve, perm=None, tol=1e-6, ax=None):
+    """
+    Visualize the system of equations and calculate the step error.
+
+    Parameters
+    ----------
+    K : sparse matrix
+        Stiffness matrix (symmetric positive-semi definite).
+    u : numpy.ndarray
+        Displacement vector.
+    F : numpy.ndarray
+        Load vector.
+    du : numpy.ndarray
+        Incremental displacement vector.
+    dF : numpy.ndarray
+        Incremental load vector.
+    C : sparse matrix
+        Constraint matrix.
+    f : numpy.ndarray
+        Force vector.
+    H : numpy.ndarray
+        Upper-bound vector.
+    df : numpy.ndarray
+        Incremental force vector.
+    dH : numpy.ndarray
+        Incremental upper-bound vector.
+
+    Returns
+    -------
+    ax : matplotlib.axes.Axes
+        Matplotlib axes.
+
+    Other Parameters
+    ----------------
+    solve : callable, optional
+        Sparse solver. It is a callable object that takes as inputs a sparse
+        symmetric matrix 𝔸 and a vector 𝒃 and returns the solution 𝒙 of the
+        linear system: 𝔸 𝒙 = 𝒃. Default is `scipy.sparse.linalg.spsolve`.
+    perm : numpy.ndarray, optional
+        Permutation of indices.
+    tol : float, optional
+        Tolerance used for contact detection (mm). Default is 1e-6 mm.
+    ax : matplotlib.axes.Axes, optional
+        Matplotlib axes.
+
+    """
+    # Assemble the quadratic programming system
+    P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
+    x = np.r_[u, f]
+    q = np.r_[F, H]
+    dx = np.r_[du, df]
+    dq = np.r_[dF, dH]
+
+    mask0 = np.array([True] * K.shape[0] + [False] * C.shape[0])
+    D0 = sp.sparse.diags(mask0.astype(float))
+    mask1 = np.array([False] * K.shape[0] + [*(np.isclose(C @ u, H) & np.tile([True, False, False], C.shape[0] // 3))])
+    D1 = sp.sparse.diags(mask1.astype(float))
+    mask2 = np.array([False] * K.shape[0] + [*(np.isclose(C @ u, H) & np.tile([False, True, False], C.shape[0] // 3))])
+    D2 = sp.sparse.diags(mask2.astype(float))
+    mask3 = np.array([False] * K.shape[0] + [*(np.isclose(C @ u, H) & np.tile([False, False, True], C.shape[0] // 3))])
+    D3 = sp.sparse.diags(mask3.astype(float))
+    mask4 = np.array([False] * K.shape[0] + [*(~np.isclose(C @ u, H))])
+    D4 = sp.sparse.diags(mask4.astype(float))
+
+    if perm is None:
+        perm = np.arange(P.shape[0])
+
+    # Figure
+    if ax is None:
+        fig, ax = plt.subplots()
+    ax.spy((D0 @ P @ D0)[np.ix_(perm, perm)], ms=3, color='black', alpha=0.5, label="stiffness")
+    ax.spy((D2 @ P + P @ D2)[np.ix_(perm, perm)], ms=3, color='tab:blue', alpha=0.25, label="inner")
+    ax.spy((D1 @ P + P @ D1)[np.ix_(perm, perm)], ms=3, color='tab:green', alpha=0.5, label="lower")
+    ax.spy((D3 @ P + P @ D3)[np.ix_(perm, perm)], ms=3, color='tab:red', alpha=0.5, label="upper")
+    ax.spy((D4 @ P + P @ D4)[np.ix_(perm, perm)], ms=1, color='gray', zorder=-1, alpha=0.1,
+           label="inactive")
+    ax.legend()
+
+    mask = (np.real(q - P @ x) <= tol)
+    mask &= np.array(np.sum(np.abs(np.real(P)), axis=0) > 0).ravel()
+
+    # Solve linear problem
+    dx[perm[mask[perm]]] = np.real(
+        solve(
+            P[np.ix_(perm[mask[perm]], perm[mask[perm]])],
+            dq[perm[mask[perm]]]
+        )
+    )
+
+    # Calculate error
+    err = np.linalg.norm(P[np.ix_(mask, mask)] @ dx[mask] - dq[mask])
+    print(err)
+
+    return ax
 
 
 ################################################################################

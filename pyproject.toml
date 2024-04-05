@@ -38,5 +38,5 @@
 
 [tool.hatch.build.targets.wheel]
     where = [
-        "src/fibermat"
+        "src/fibermat",
     ]

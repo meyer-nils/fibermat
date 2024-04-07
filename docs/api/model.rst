@@ -60,9 +60,9 @@ Example
     # Build the fiber network
     net = Net(mat)
     # Stack fibers
-    stack = Stack(mat, net)
+    net = Stack(mat, net)
     # Create the fiber mesh
-    mesh = Mesh(stack)
+    mesh = Mesh(net)
 
     # Assemble the quadratic programming system
     K, u, F, du, dF = stiffness(mat, mesh)

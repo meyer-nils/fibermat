@@ -73,9 +73,9 @@ if __name__ == "__main__":
     # Build the fiber network
     net = Net(mat, periodic=True)
     # Stack fibers
-    stack = Stack(mat, net, threshold=10)
+    net = Stack(mat, net, threshold=10)
     # Create the fiber mesh
-    mesh = Mesh(stack)
+    mesh = Mesh(net)
 
     # Assemble the quadratic programming system
     K, u, F, du, dF = stiffness(mat, mesh)

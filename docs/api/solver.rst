@@ -28,9 +28,9 @@ Example
     # Build the fiber network
     net = Net(mat)
     # Stack fibers
-    stack = Stack(mat, net)
+    net = Stack(mat, net)
     # Create the fiber mesh
-    mesh = Mesh(stack)
+    mesh = Mesh(net)
 
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(

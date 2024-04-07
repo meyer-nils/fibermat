@@ -295,9 +295,9 @@ if __name__ == "__main__":
     # Build the fiber network
     net = Net(mat, periodic=False)
     # Stack fibers
-    stack = Stack(mat, net)
+    net = Stack(mat, net)
     # Create the fiber mesh
-    mesh = Mesh(stack)
+    mesh = Mesh(net)
 
     # Create a VTK mat
     vtk_mat(mat).plot()

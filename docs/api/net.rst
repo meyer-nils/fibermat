@@ -58,8 +58,8 @@ Example
         for point in tqdm(points[~np.isclose(f, 0)], desc="Draw nodes"):
             plt.plot(*point.T, '--ok', lw=1, mfc='none', ms=3, alpha=0.2)
     # Set drawing box dimensions
-    ax.set_xlim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])
-    ax.set_ylim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])
+    ax.set_xlim(-0.5 * net.attrs["size"], 0.5 * net.attrs["size"])
+    ax.set_ylim(-0.5 * net.attrs["size"], 0.5 * net.attrs["size"])
     # Add a color bar
     norm = plt.Normalize(vmin=np.min(load), vmax=np.max(load))
     smap = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
@@ -94,7 +94,7 @@ Example
     # Build the fiber network
     net = Net(mat, periodic=False)
     # Stack fibers
-    stack = Stack(mat, net)
+    net = Stack(mat, net)
 
     # Get the linear system
     C, f, H, h = Stack.constraint(mat, net)
@@ -105,13 +105,13 @@ Example
     load = 0.5 * force @ np.abs(C) + 0.5 * force @ C
 
     # Check data
-    Stack.check(stack)  # or `stack.check()`
+    Stack.check(net)  # or `net.check()`
     # -> returns True if correct, otherwise it raises an error.
 
     # Normalize by fiber weight
     load /= np.pi / 4 * mat[[*"lbh"]].prod(axis=1).mean()
     # Get loaded nodes
-    points = (stack[stack.A < stack.B][["xA", "yA", "zA", "xB", "yB", "zB"]]
+    points = (net[net.A < net.B][["xA", "yA", "zA", "xB", "yB", "zB"]]
               .values.reshape(-1, 2, 3))
     # Prepare color scale
     cmap = plt.cm.viridis
@@ -135,8 +135,8 @@ Example
         for point in tqdm(points[~np.isclose(force, 0)]):
             plt.plot(*point.T, '--ok', lw=1, mfc='none', ms=3, alpha=0.2)
     # Set drawing box dimensions
-    ax.set_xlim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])
-    ax.set_ylim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])
+    ax.set_xlim(-0.5 * net.attrs["size"], 0.5 * net.attrs["size"])
+    ax.set_ylim(-0.5 * net.attrs["size"], 0.5 * net.attrs["size"])
     # Add a color bar
     norm = plt.Normalize(vmin=np.min(load), vmax=np.max(load))
     smap = plt.cm.ScalarMappable(cmap=cmap, norm=norm)

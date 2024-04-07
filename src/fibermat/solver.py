@@ -137,8 +137,8 @@ def solve(mesh, stiffness, constraint, packing=1., itermax=1000,
 
         >>> mat = Mat(100)
         >>> net = Net(mat)
-        >>> stack = Stack(mat, net)
-        >>> mesh = Mesh(stack)
+        >>> net = Stack(mat, net)
+        >>> mesh = Mesh(net)
 
         >>> K, u, F, du, dF = stiffness(mat, mesh)
         >>> C, f, H, df, dH = constraint(mat, mesh)
@@ -372,9 +372,9 @@ if __name__ == "__main__":
     # Build the fiber network
     net = Net(mat)
     # Stack fibers
-    stack = Stack(mat, net)
+    net = Stack(mat, net)
     # Create the fiber mesh
-    mesh = Mesh(stack)
+    mesh = Mesh(net)
 
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(

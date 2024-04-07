@@ -40,8 +40,8 @@
 @project: FiberMat
 @version: v1.0
 
-License:
---------
+License
+-------
 MIT License
 
 Copyright (c) 2024 François Mahé
@@ -64,12 +64,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-Description:
-------------
+Description
+-----------
 A mechanical solver to simulate fiber packing and perform statistical analysis.
 
-References:
------------
+References
+----------
 Mahé, F. (2023). Statistical mechanical framework for discontinuous composites:
   application to the modeling of flow in SMC compression molding (Doctoral
   dissertation, École centrale de Nantes).
@@ -202,9 +202,9 @@ mat = Mat(100, length=25, width=2, thickness=0.5, tensile=2500)
 # Build the fiber network
 net = Net(mat, periodic=True)
 # Stack fibers
-stack = Stack(mat, net, threshold=10)
+net = Stack(mat, net, threshold=10)
 # Create the fiber mesh
-mesh = Mesh(stack)
+mesh = Mesh(net)
 
 # Solve the mechanical packing problem
 K, C, u, f, F, H, Z, rlambda, mask, err = solve(

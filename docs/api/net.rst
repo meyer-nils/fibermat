@@ -84,8 +84,8 @@ Example
     stack = Stack(net)
 
     # Get the linear system
-    C, mg, H, h = Stack.constraint(net)
-    linsol = Stack.solve(net)
+    C, mg, H, h = Stack.constraint(stack)
+    linsol = Stack.solve(stack)
     # Contact force
     f = linsol.ineqlin.marginals
     # Resulting force

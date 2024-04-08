@@ -409,11 +409,11 @@ class Stack(Net):
         with \quad \mathbf{f} = -\mathbf{m} \, g \quad and \quad \mathbf{h} > 0
 
     where:
+        - 𝐳 is the vector of fiber vertical positions (*unknowns of the problem*).
         - 𝐟 is the vector of fiber weights (with 𝐦 : fiber masses, 𝑔 gravity).
-        - 𝐳 is the unknown vector of fiber vertical positions.
         - 𝐡 is the vector of fiber thicknesses.
         - ℂ is the matrix of inequality constraints that positions must satisfy to prevent the fibers from crossing each other.
-        - 𝐇 corresponds to the minimum distances between the pairs of fibers.
+        - -𝐇 corresponds to the minimum distances between the pairs of fibers.
 
     *Non-penetration conditions* between two fibers give the expressions of rows of ℂ and 𝐇:
 
@@ -819,8 +819,8 @@ if __name__ == "__main__":
     stack = Stack(net)
 
     # Get the linear system
-    C, mg, H, h = Stack.constraint(net)
-    linsol = Stack.solve(net)
+    C, mg, H, h = Stack.constraint(stack)
+    linsol = Stack.solve(stack)
     # Contact force
     f = linsol.ineqlin.marginals
     # Resulting force

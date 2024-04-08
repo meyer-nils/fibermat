@@ -67,7 +67,7 @@ def stiffness(mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
 
     The displacement vector :math:`\mathbf{u} = (\dots, u_i, \theta_i, \dots)`
     (with 𝑢ᵢ being the vertical displacement and θᵢ the rotation of the cross-section of the i-th node)
-    satisfies **mechanical equilibrium**:
+    satisfies *mechanical equilibrium*:
 
     .. MATH::
         \mathbb{K} \, \mathbf{u} = \mathbf{F}
@@ -236,7 +236,7 @@ def constraint(mesh, **kwargs):
         - :math:`h_A` and :math:`h_B` are the fiber thicknesses at nodes A and B.
 
     The vector 𝐟 is the vector of Lagrangian multipliers that corresponds to contact forces.
-    It satisfies **KKT conditions**:
+    It satisfies *KKT conditions*:
 
     .. MATH::
         \mathbb{C} \, \mathbf{u} \leq \mathbf{H} \, ,

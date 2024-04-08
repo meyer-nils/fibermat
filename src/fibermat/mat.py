@@ -16,9 +16,9 @@ class Mat(pd.DataFrame):
 
     It defines:
 
-        - the geometry of the straight fibers.
-        - the initial configuration (positions and orientations).
-        - the material properties.
+        - the *geometry* of the straight fibers.
+        - the *initial configuration* (positions and orientations).
+        - the *material properties*.
 
     Parameters
     ----------

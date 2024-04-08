@@ -159,7 +159,7 @@ def vtk_mat(mat=None, func=None, verbose=True, **kwargs):
 
 def vtk_mesh(mesh=None,
              displacement=None, rotation=None,
-             force=None, moment=None,
+             force=None, torque=None,
              verbose=True, **kwargs):
     """
     Export a :class:`~.Mesh` object as VTK mesh.
@@ -182,7 +182,7 @@ def vtk_mesh(mesh=None,
         Rotation field.
     force : numpy.ndarray, optional
         Load field.
-    moment : numpy.ndarray, optional
+    torque : numpy.ndarray, optional
         Torque field.
     verbose : bool, optional
         If True, a progress bar is displayed. Default is True.
@@ -250,9 +250,9 @@ def vtk_mesh(mesh=None,
             msh["curvature"] = displacement.derivative(2)(x)
             msh.points += msh["displacement"]
         if force is not None:
-            if moment is None:
-                moment = 0 * force
-            force = CubicHermiteSpline(s, force, moment)
+            if torque is None:
+                torque = 0 * force
+            force = CubicHermiteSpline(s, force, torque)
             msh["force"] = force(x)
 
     # Periodic boundary conditions (optional)

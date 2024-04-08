@@ -313,7 +313,9 @@ if __name__ == "__main__":
     # Export as VTK
     msh = vtk_mesh(
         mesh,
-        displacement(u(1)), rotation(u(1)),
-        force(f(1) @ C), torque(f(1) @ C)
+        displacement(u(1)),
+        rotation(u(1)),
+        force(f(1) @ C),
+        torque(f(1) @ C),
     )
     msh.plot(scalars="force", cmap=plt.cm.twilight_shifted)

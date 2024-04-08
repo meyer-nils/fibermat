@@ -1,6 +1,6 @@
 from fibermat import *
 
-mesh = Mesh(Stack(Net(Mat(100))))
+mesh = Mesh(Stack(Net(Mat(10))))
 
 K, C, u, f, F, H, Z, rlambda, mask, err = solve(
     mesh,

@@ -100,12 +100,12 @@ def vtk_fiber(length=25., width=1., thickness=1., x=0., y=0., z=0.,
 
 def vtk_mat(mat=None, func=None, verbose=True, **kwargs):
     """
-    Export a :class:`Mat` object as VTK mesh.
+    Export a :class:`~.Mat` object as VTK mesh.
 
     Parameters
     ----------
     mat : pandas.DataFrame, optional
-        Set of fibers represented by a :class:`Mat` object.
+        Set of fibers represented by a :class:`~.Mat` object.
     func : callable, optional
         Function called for each fiber to modify the mesh or add fields.
         It takes as arguments the VTK mesh and the label of the fiber.
@@ -162,12 +162,12 @@ def vtk_mesh(mesh=None,
              force=None, moment=None,
              verbose=True, **kwargs):
     """
-    Export a :class:`Mesh` object as VTK mesh.
+    Export a :class:`~.Mesh` object as VTK mesh.
 
     Parameters
     ----------
     mesh : pandas.DataFrame, optional
-        Fiber mesh represented by a :class:`Mesh` object.
+        Fiber mesh represented by a :class:`~.Mesh` object.
 
     Returns
     -------

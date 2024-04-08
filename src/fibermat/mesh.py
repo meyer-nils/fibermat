@@ -23,7 +23,7 @@ class Mesh(pd.DataFrame):
     Parameters
     ----------
     net : pandas.DataFrame, optional
-         Fiber network represented by a :class:`Net` object.
+         Fiber network represented by a :class:`~.Net` object.
 
     Other Parameters
     ----------------
@@ -142,7 +142,7 @@ class Mesh(pd.DataFrame):
         Parameters
         ----------
         net : pandas.DataFrame, optional
-             Fiber network represented by a :class:`Net` object.
+             Fiber network represented by a :class:`~.Net` object.
 
         Returns
         -------

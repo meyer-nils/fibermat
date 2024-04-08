@@ -54,13 +54,13 @@ def solve(mesh, stiffness, constraint, packing=1., itermax=1000,
 
     .. HINT::
         Models used to build the matrices are implemented in :ref:`🔧 Model`:
-            - 𝕂 and 𝐅 : :func:`~.model.stiffness`.
-            - ℂ and 𝐇 : :func:`~.model.constraint`.
+            - 𝕂 and 𝐅 : :func:`~.model.timoshenko.stiffness`.
+            - ℂ and 𝐇 : :func:`~.model.timoshenko.constraint`.
 
     Parameters
     ----------
     mesh : pandas.DataFrame, optional
-        Fiber mesh represented by a :class:`Mesh` object.
+        Fiber mesh represented by a :class:`~.Mesh` object.
     stiffness : tuple
         K : sparse matrix
             Stiffness matrix (symmetric positive-semi definite).

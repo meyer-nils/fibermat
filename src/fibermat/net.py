@@ -17,7 +17,7 @@ class Net(pd.DataFrame):
     r"""
     A class inherited from pandas.DataFrame_ to **build a fiber network**.
 
-    It describes nodes and connections between fibers within a :class:`Mat` object:
+    It describes nodes and connections between fibers within a :class:`~.Mat` object:
 
         - *nodes* are defined as the nearest points between pairs of fibers.
         - *connections* link pairs of nodes to define relative positions between fibers.
@@ -25,7 +25,7 @@ class Net(pd.DataFrame):
     Parameters
     ----------
     mat : pandas.DataFrame, optional
-        Set of fibers represented by a :class:`Mat` object.
+        Set of fibers represented by a :class:`~.Mat` object.
 
     Other Parameters
     ----------------
@@ -151,7 +151,7 @@ class Net(pd.DataFrame):
         Parameters
         ----------
         mat : pandas.DataFrame, optional
-            Set of fibers represented by a :class:`Mat` object.
+            Set of fibers represented by a :class:`~.Mat` object.
 
         Returns
         -------
@@ -567,7 +567,7 @@ class Stack(Net):
             Additional keyword arguments passed to the solver.
 
         .. WARNING::
-            :class:`Mat` object is modified during execution.
+            :class:`~.Mat` object is modified during execution.
 
         """
         # Optional

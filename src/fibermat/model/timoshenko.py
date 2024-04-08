@@ -79,7 +79,7 @@ def stiffness(mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
     Parameters
     ----------
     mesh : pandas.DataFrame
-        Fiber mesh represented by a :class:`Mesh` object.
+        Fiber mesh represented by a :class:`~.Mesh` object.
 
     Returns
     -------
@@ -250,7 +250,7 @@ def constraint(mesh, **kwargs):
     Parameters
     ----------
     mesh : pandas.DataFrame
-        Fiber mesh represented by a :class:`Mesh` object.
+        Fiber mesh represented by a :class:`~.Mesh` object.
 
     Returns
     -------

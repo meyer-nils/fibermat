@@ -4,7 +4,7 @@
 
 [project]
     name = "fibermat"
-    version = "1.0.11"
+    version = "1.0.11b"
     authors = [
         { name="François Mahé", email="francois.mahe@ens-rennes.fr" },
     ]

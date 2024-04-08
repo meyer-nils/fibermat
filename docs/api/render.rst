@@ -51,18 +51,15 @@ Example
     vtk_mesh(mesh).plot()
 
     # Solve the mechanical packing problem
-    K, C, u, f, F, H, Z, rlambda, mask, err = solve(
-        mesh,
-        stiffness(mesh),
-        constraint(mesh),
-        packing=4,
-    )
+    K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
 
     # Export as VTK
     msh = vtk_mesh(
         mesh,
-        displacement(u(1)), rotation(u(1)),
-        force(f(1) @ C), torque(f(1) @ C)
+        displacement(u(1)),
+        rotation(u(1)),
+        force(f(1) @ C),
+        torque(f(1) @ C),
     )
     msh.plot(scalars="force", cmap=plt.cm.twilight_shifted)
 

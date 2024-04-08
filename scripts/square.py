@@ -25,8 +25,6 @@ if __name__ == "__main__":
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
         mesh,
-        stiffness(mesh),
-        constraint(mesh),
         packing=4,
         itermax=10000,
     )

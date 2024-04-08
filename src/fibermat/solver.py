@@ -8,11 +8,10 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 from fibermat import *
-from fibermat.model.timoshenko import stiffness, constraint
 from fibermat.utils.interpolation import Interpolate
 
 
-def solve(mesh, stiffness, constraint, packing=1., itermax=1000,
+def solve(mesh, stiffness=None, constraint=None, packing=1., itermax=1000,
           solve=sp.sparse.linalg.spsolve, perm=None, tol=1e-6,
           errtol=1e-6, interp_size=None, verbose=True, **kwargs):
     r"""
@@ -61,7 +60,7 @@ def solve(mesh, stiffness, constraint, packing=1., itermax=1000,
     ----------
     mesh : pandas.DataFrame, optional
         Fiber mesh represented by a :class:`~.Mesh` object.
-    stiffness : tuple
+    stiffness : tuple, optional
         K : sparse matrix
             Stiffness matrix (symmetric positive-semi definite).
         u : numpy.ndarray
@@ -72,7 +71,7 @@ def solve(mesh, stiffness, constraint, packing=1., itermax=1000,
             Incremental displacement vector.
         dF : numpy.ndarray
             Incremental load vector.
-    constraint : tuple
+    constraint : tuple, optional
         C : sparse matrix
             Constraint matrix.
         f : numpy.ndarray
@@ -132,7 +131,7 @@ def solve(mesh, stiffness, constraint, packing=1., itermax=1000,
     verbose : bool, optional
         If True, a progress bar is displayed. Default is True.
     kwargs :
-        Additional keyword arguments ignored by the function.
+        Additional keyword arguments passed to matrix constructors if `stiffness` or `constraint` are None.
 
     :Use:
 
@@ -143,7 +142,7 @@ def solve(mesh, stiffness, constraint, packing=1., itermax=1000,
         >>> # Create the fiber mesh
         >>> mesh = Mesh(net)
         >>> # Solve the mechanical packing problem
-        >>> K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, stiffness(mesh), constraint(mesh), packing=4)
+        >>> K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
 
     """
     # Optional
@@ -151,8 +150,14 @@ def solve(mesh, stiffness, constraint, packing=1., itermax=1000,
         mesh = Mesh()
 
     # Assemble the quadratic programming system
-    K, u, F, du, dF = stiffness
-    C, f, H, df, dH = constraint
+    if stiffness is None:
+        K, u, F, du, dF = fibermat.model.timoshenko.stiffness(mesh, **kwargs)
+    else:
+        K, u, F, du, dF = stiffness
+    if constraint is None:
+        C, f, H, df, dH = fibermat.model.timoshenko.constraint(mesh, **kwargs)
+    else:
+        C, f, H, df, dH = constraint
     P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
     x = np.r_[u, f]
     q = np.r_[F, H]
@@ -372,12 +377,7 @@ if __name__ == "__main__":
     mesh = Mesh(stack)
 
     # Solve the mechanical packing problem
-    K, C, u, f, F, H, Z, rlambda, mask, err = solve(
-        mesh,
-        stiffness(mesh),
-        constraint(mesh),
-        packing=4,
-    )
+    K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
 
     # Deform the mesh
     mesh.z += displacement(u(1))

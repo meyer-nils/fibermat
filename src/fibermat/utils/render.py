@@ -303,12 +303,7 @@ if __name__ == "__main__":
     vtk_mesh(mesh).plot()
 
     # Solve the mechanical packing problem
-    K, C, u, f, F, H, Z, rlambda, mask, err = solve(
-        mesh,
-        stiffness(mesh),
-        constraint(mesh),
-        packing=4,
-    )
+    K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
 
     # Export as VTK
     msh = vtk_mesh(

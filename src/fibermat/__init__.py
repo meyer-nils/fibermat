@@ -101,8 +101,6 @@ P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
 
 K, C, u, f, F, H, Z, rlambda, mask, err = solve(
     mesh,
-    stiffness(mesh),
-    constraint(mesh),
     packing=4,
     solve=lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=True),
     perm=sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True),

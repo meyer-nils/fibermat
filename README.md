@@ -207,12 +207,7 @@ stack = Stack(net, threshold=10)
 mesh = Mesh(stack)
 
 # Solve the mechanical packing problem
-K, C, u, f, F, H, Z, rlambda, mask, err = solve(
-    mesh,
-    stiffness(mesh),
-    constraint(mesh),
-    packing=4,
-)
+K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
 
 # Export as VTK
 msh = vtk_mesh(

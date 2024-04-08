@@ -33,12 +33,7 @@ Example
     mesh = Mesh(stack)
 
     # Solve the mechanical packing problem
-    K, C, u, f, F, H, Z, rlambda, mask, err = solve(
-        mesh,
-        stiffness(mesh),
-        constraint(mesh),
-        packing=4,
-    )
+    K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
 
     # Deform the mesh
     mesh.z += displacement(u(1))

@@ -81,31 +81,14 @@ if __name__ == "__main__":
     K, u, F, du, dF = stiffness(mesh)
     C, f, H, df, dH = constraint(mesh)
     P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
-    # Permutation of indices
-    perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
-    # Enhanced solver
-    spsolve = lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=False)
-    # # Visualize the system
-    # fig, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
-    # plot_system((K, u, F, du, dF), (C, f, H, df, dH), perm=None, ax=ax[0])
-    # plot_system((K, u, F, du, dF), (C, f, H, df, dH), perm=perm, ax=ax[1])
-    # plt.show()
 
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
         mesh,
-        stiffness(mesh),
-        constraint(mesh),
         packing=4,
-        solve=spsolve,
-        perm=perm,
+        solve=lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=False),
+        perm=sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True),
     )
-
-    # # Visualize the system
-    # fig, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
-    # plot_system((K, u(0), F(0), du, dF), (C, f(0), H(0), df, dH), ax=ax[0])
-    # plot_system((K, u(1), F(1), du, dF), (C, f(1), H(1), df, dH), ax=ax[1])
-    # plt.show()
 
     # Export as VTK
     msh = vtk_mesh(

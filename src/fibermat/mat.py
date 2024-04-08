@@ -7,6 +7,8 @@ import warnings
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+from fibermat import *
+
 
 class Mat(pd.DataFrame):
     """
@@ -140,7 +142,7 @@ class Mat(pd.DataFrame):
         `Mat.init`.
 
         """
-        if len(args) and isinstance(args[0], pd.DataFrame):
+        if len(args) and Mat._is(args[0]):
             # Initialize the DataFrame from argument
             super().__init__(*args, **kwargs)
             # Copy global attributes from argument
@@ -337,6 +339,15 @@ class Mat(pd.DataFrame):
         # Return True if the test is correct
         return True
 
+    def _is(self):
+        if self is None:
+            return False
+        try:
+            __class__.check(self)
+            return True
+        except:
+            return False
+
 
 ################################################################################
 # Main
@@ -344,7 +355,7 @@ class Mat(pd.DataFrame):
 
 if __name__ == "__main__":
 
-    from fibermat import *
+    # from fibermat import *
 
     # Generate a set of fibers
     mat = Mat(10)

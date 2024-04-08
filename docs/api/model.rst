@@ -36,7 +36,7 @@ Example
     net = Net(mat)
     mesh = Mesh(net)
     print("Linear (Ψ² ≫ 1) =")
-    print(4 / np.pi * stiffness(mat, mesh, coupling=1)[0].todense())
+    print(4 / np.pi * stiffness(mesh, coupling=1)[0].todense())
     print()
 
     # Timoshenko model (Ψ² = 1)
@@ -44,7 +44,7 @@ Example
     net = Net(mat)
     mesh = Mesh(net)
     print("Timoshenko (Ψ² = 1) = 1 / 2 *")
-    print(4 / np.pi * stiffness(mat, mesh, coupling=1)[0].todense())
+    print(4 / np.pi * stiffness(mesh, coupling=1)[0].todense())
     print()
 
     # Euler model (Ψ² ≪ 1)
@@ -52,7 +52,7 @@ Example
     net = Net(mat)
     mesh = Mesh(net)
     print("Euler (Ψ² ≪ 1) = 1 / 12 *")
-    print(4 / np.pi * stiffness(mat, mesh, coupling=1)[0].todense())
+    print(4 / np.pi * stiffness(mesh, coupling=1)[0].todense())
     print()
 
     # Generate a set of fibers
@@ -60,20 +60,20 @@ Example
     # Build the fiber network
     net = Net(mat)
     # Stack fibers
-    net = Stack(mat, net)
+    stack = Stack(net)
     # Create the fiber mesh
-    mesh = Mesh(net)
+    mesh = Mesh(stack)
 
     # Assemble the quadratic programming system
-    K, u, F, du, dF = stiffness(mat, mesh)
-    C, f, H, df, dH = constraint(mat, mesh)
+    K, u, F, du, dF = stiffness(mesh)
+    C, f, H, df, dH = constraint(mesh)
     P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
     # Permutation of indices
     perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
     # Visualize the system
     fig, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
-    plot_system(K, u, F, du, dF, C, f, H, df, dH, perm=None, ax=ax[0])
-    plot_system(K, u, F, du, dF, C, f, H, df, dH, perm=perm, ax=ax[1])
+    plot_system((K, u, F, du, dF), (C, f, H, df, dH), perm=None, ax=ax[0])
+    plot_system((K, u, F, du, dF), (C, f, H, df, dH), perm=perm, ax=ax[1])
     plt.show()
 
 .. code-block::

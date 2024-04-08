@@ -7,6 +7,7 @@ import warnings
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+from fibermat import *
 from fibermat.model.timoshenko import stiffness, constraint
 from fibermat.utils.interpolation import Interpolate
 
@@ -14,7 +15,9 @@ from fibermat.utils.interpolation import Interpolate
 def solve(mesh, stiffness, constraint, packing=1., itermax=1000,
           solve=sp.sparse.linalg.spsolve, perm=None, tol=1e-6,
           errtol=1e-6, interp_size=None, verbose=True, **kwargs):
-    r"""An iterative mechanical solver for fiber packing problems.
+    r"""
+    An iterative mechanical solver for **fiber packing problems**.
+
     It solves the *quadratic programming problem*:
 
     .. MATH::
@@ -133,25 +136,14 @@ def solve(mesh, stiffness, constraint, packing=1., itermax=1000,
 
     :Use:
 
-        >>> from fibermat import *
-
+        >>> # Generate a set of fibers
         >>> mat = Mat(100)
+        >>> # Build the fiber network
         >>> net = Net(mat)
-        >>> net = Stack(mat, net)
+        >>> # Create the fiber mesh
         >>> mesh = Mesh(net)
-
-        >>> K, u, F, du, dF = stiffness(mat, mesh)
-        >>> C, f, H, df, dH = constraint(mat, mesh)
-        >>> P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
-
-        >>> K, u, F, du, dF = stiffness(mat, mesh)
-        >>> C, f, H, df, dH = constraint(mat, mesh)
-        >>> P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
-
-        >>> spsolve = lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=True)
-        >>> perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
-
-        >>> K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, stiffness(mat, mesh), constraint(mat, mesh), packing=4, solve=spsolve, perm=perm)
+        >>> # Solve the mechanical packing problem
+        >>> K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, stiffness(mesh), constraint(mesh), packing=4)
 
     """
     # Optional
@@ -365,22 +357,22 @@ def plot_system(stiffness, constraint,
 
 if __name__ == "__main__":
 
-    from fibermat import *
+    # from fibermat import *
 
     # Generate a set of fibers
     mat = Mat(10)
     # Build the fiber network
     net = Net(mat)
     # Stack fibers
-    net = Stack(mat, net)
+    stack = Stack(net)
     # Create the fiber mesh
-    mesh = Mesh(net)
+    mesh = Mesh(stack)
 
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
         mesh,
-        stiffness(mat, mesh),
-        constraint(mat, mesh),
+        stiffness(mesh),
+        constraint(mesh),
         packing=4,
     )
 

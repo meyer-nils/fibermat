@@ -73,13 +73,13 @@ if __name__ == "__main__":
     # Build the fiber network
     net = Net(mat, periodic=True)
     # Stack fibers
-    net = Stack(mat, net, threshold=10)
+    stack = Stack(net, threshold=10)
     # Create the fiber mesh
-    mesh = Mesh(net)
+    mesh = Mesh(stack)
 
     # Assemble the quadratic programming system
-    K, u, F, du, dF = stiffness(mat, mesh)
-    C, f, H, df, dH = constraint(mat, mesh)
+    K, u, F, du, dF = stiffness(mesh)
+    C, f, H, df, dH = constraint(mesh)
     P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
     # Permutation of indices
     perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
@@ -94,8 +94,8 @@ if __name__ == "__main__":
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
         mesh,
-        stiffness(mat, mesh),
-        constraint(mat, mesh),
+        stiffness(mesh),
+        constraint(mesh),
         packing=4,
         solve=spsolve,
         perm=perm,
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
     # Export as VTK
     msh = vtk_mesh(
-        mat, mesh,
+        mesh,
         displacement(u(1)), rotation(u(1)),
         force(f(1) @ C), torque(f(1) @ C)
     )

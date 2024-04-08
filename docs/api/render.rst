@@ -40,27 +40,27 @@ Example
     # Build the fiber network
     net = Net(mat, periodic=True)
     # Stack fibers
-    net = Stack(mat, net)
+    stack = Stack(net)
     # Create the fiber mesh
-    mesh = Mesh(net)
+    mesh = Mesh(stack)
 
     # Create a VTK mat
     vtk_mat(mat).plot()
 
     # Create a VTK mesh
-    vtk_mesh(mat, mesh).plot()
+    vtk_mesh(mesh).plot()
 
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
         mesh,
-        stiffness(mat, mesh, lmin=0.01, coupling=0.99),
-        constraint(mat, mesh),
-        packing=4, itermax=1000, interp_size=100
+        stiffness(mesh),
+        constraint(mesh),
+        packing=4,
     )
 
     # Export as VTK
     msh = vtk_mesh(
-        mat, mesh,
+        mesh,
         displacement(u(1)), rotation(u(1)),
         force(f(1) @ C), torque(f(1) @ C)
     )

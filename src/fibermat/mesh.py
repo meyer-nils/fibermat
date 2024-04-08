@@ -7,6 +7,7 @@ import warnings
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+from fibermat import *
 from fibermat import Mat, Net
 
 
@@ -16,8 +17,8 @@ class Mesh(pd.DataFrame):
 
     It defines:
 
-        - the **beam** elements (intra-fiber connections).
-        - the **constraint** elements (inter-fiber connections).
+        - the *beam* elements (intra-fiber connections).
+        - the *constraint* elements (inter-fiber connections).
 
     Parameters
     ----------
@@ -121,6 +122,8 @@ class Mesh(pd.DataFrame):
             super().__init__(*args, **kwargs)
             # Copy global attributes from argument
             self.attrs = args[0].attrs
+            # Copy global flags from argument
+            self.flags.mat = args[0].flags.mat
 
         else:
             # Initialize the DataFrame from parameters
@@ -176,6 +179,9 @@ class Mesh(pd.DataFrame):
         # Set attributes
         mesh.attrs = net.attrs
 
+        # Set flags
+        mesh.flags.mat = net.flags.mat
+
         if len(net):
             # Inter-fiber connections
             mesh.constraint = mesh.index.values.reshape(-1, 2)[:, ::-1].ravel()
@@ -210,6 +216,8 @@ class Mesh(pd.DataFrame):
                 Box dimensions (mm). By default, the domain is a 50 mm square cube.
             - periodic : bool
                 Boundary periodicity. By default, the domain is periodic.
+            - threshold : float, optional
+                Threshold distance value for proximity detection (mm).
 
         """
         return self._attrs
@@ -261,6 +269,8 @@ class Mesh(pd.DataFrame):
                           " Delete it or set it to False.".format(mesh.__class__),
                           UserWarning)
             return True
+
+        assert Mat.check(mesh.flags.mat)
 
         # Keys
         try:
@@ -325,6 +335,15 @@ class Mesh(pd.DataFrame):
         # Return True if the test is correct
         return True
 
+    def _is(self):
+        if self is None:
+            return False
+        try:
+            __class__.check(self)
+            return True
+        except:
+            return False
+
 
 ################################################################################
 # Main
@@ -332,7 +351,7 @@ class Mesh(pd.DataFrame):
 
 if __name__ == "__main__":
 
-    from fibermat import *
+    # from fibermat import *
 
     # Generate a set of fibers
     mat = Mat(10)

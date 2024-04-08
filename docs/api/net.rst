@@ -28,14 +28,6 @@ Example
     points = (net[["xA", "yA", "zA", "xB", "yB", "zB"]]
               .values.reshape(-1, 2, 3))  # size: (n x 2 x 3)
 
-    # Get the linear system
-    C, mg, H, h = Stack.constraint(mat, net)
-    linsol = Stack.solve(mat, net)
-    # Contact force
-    f = linsol.ineqlin.marginals
-    # Resulting force
-    load = 0.5 * f @ np.abs(C) + 0.5 * f @ C
-
     # Check data
     Net.check(net)  # or `net.check()`
     # -> returns True if correct, otherwise it raises an error.
@@ -52,19 +44,14 @@ Example
             # Calculate fiber end points
             A = fiber[[*"xyz"]].values - 0.5 * fiber.l * fiber[[*"uvw"]].values
             B = fiber[[*"xyz"]].values + 0.5 * fiber.l * fiber[[*"uvw"]].values
-            plt.plot(*np.c_[A, B], c=cmap(color(load[i])))
+            plt.plot(*np.c_[A, B], c=plt.cm.tab10(i % 10))
     if len(points):
         # Draw contacts
-        for point in tqdm(points[~np.isclose(f, 0)], desc="Draw nodes"):
+        for point in tqdm(points, desc="Draw nodes"):
             plt.plot(*point.T, '--ok', lw=1, mfc='none', ms=3, alpha=0.2)
     # Set drawing box dimensions
     ax.set_xlim(-0.5 * net.attrs["size"], 0.5 * net.attrs["size"])
     ax.set_ylim(-0.5 * net.attrs["size"], 0.5 * net.attrs["size"])
-    # Add a color bar
-    norm = plt.Normalize(vmin=np.min(load), vmax=np.max(load))
-    smap = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
-    cbar = plt.colorbar(smap, ax=ax)
-    cbar.set_label("Load / $mg$ ($N\,/\,N$)")
     plt.show()
 
 
@@ -94,24 +81,24 @@ Example
     # Build the fiber network
     net = Net(mat, periodic=False)
     # Stack fibers
-    net = Stack(mat, net)
+    stack = Stack(net)
 
     # Get the linear system
-    C, f, H, h = Stack.constraint(mat, net)
-    linsol = Stack.solve(mat, net)
+    C, mg, H, h = Stack.constraint(net)
+    linsol = Stack.solve(net)
     # Contact force
-    force = linsol.ineqlin.marginals
+    f = linsol.ineqlin.marginals
     # Resulting force
-    load = 0.5 * force @ np.abs(C) + 0.5 * force @ C
+    load = 0.5 * f @ np.abs(C) + 0.5 * f @ C
 
     # Check data
-    Stack.check(net)  # or `net.check()`
+    Stack.check(stack)  # or `stack.check()`
     # -> returns True if correct, otherwise it raises an error.
 
     # Normalize by fiber weight
     load /= np.pi / 4 * mat[[*"lbh"]].prod(axis=1).mean()
     # Get loaded nodes
-    points = (net[net.A < net.B][["xA", "yA", "zA", "xB", "yB", "zB"]]
+    points = (stack[stack.A < stack.B][["xA", "yA", "zA", "xB", "yB", "zB"]]
               .values.reshape(-1, 2, 3))
     # Prepare color scale
     cmap = plt.cm.viridis
@@ -123,7 +110,7 @@ Example
     ax.view_init(azim=45, elev=30, roll=0)
     if len(mat):
         # Draw fibers
-        for i in tqdm(range(len(mat))):
+        for i in tqdm(range(len(mat)), desc="Draw fibers"):
             # Get fiber data
             fiber = mat.iloc[i]
             # Calculate fiber end points
@@ -132,11 +119,11 @@ Example
             plt.plot(*np.c_[A, B], c=cmap(color(load[i])))
     if len(points):
         # Draw contacts
-        for point in tqdm(points[~np.isclose(force, 0)]):
+        for point in tqdm(points[~np.isclose(f, 0)], desc="Draw nodes"):
             plt.plot(*point.T, '--ok', lw=1, mfc='none', ms=3, alpha=0.2)
     # Set drawing box dimensions
-    ax.set_xlim(-0.5 * net.attrs["size"], 0.5 * net.attrs["size"])
-    ax.set_ylim(-0.5 * net.attrs["size"], 0.5 * net.attrs["size"])
+    ax.set_xlim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])
+    ax.set_ylim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])
     # Add a color bar
     norm = plt.Normalize(vmin=np.min(load), vmax=np.max(load))
     smap = plt.cm.ScalarMappable(cmap=cmap, norm=norm)

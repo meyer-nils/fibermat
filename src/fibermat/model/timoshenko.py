@@ -5,6 +5,7 @@ import numpy as np
 import scipy as sp
 from scipy.interpolate import interp1d
 
+from fibermat import *
 from fibermat import Mat, Mesh
 
 
@@ -36,7 +37,7 @@ def torque(F):
 # Mechanical model
 ################################################################################
 
-def stiffness(mat, mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
+def stiffness(mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
     r"""
     Assemble the quadratic system to be minimized.
 
@@ -77,8 +78,6 @@ def stiffness(mat, mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
 
     Parameters
     ----------
-    mat : pandas.DataFrame
-        Set of fibers represented by a :class:`Mat` object.
     mesh : pandas.DataFrame
         Fiber mesh represented by a :class:`Mesh` object.
 
@@ -116,7 +115,7 @@ def stiffness(mat, mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
         >>> net = Net(mat)
         >>> mesh = Mesh(net)
         >>> # print("Linear (Ψ² ≫ 1) =")
-        >>> print(4 / np.pi * stiffness(mat, mesh, coupling=1)[0].todense())
+        >>> print(4 / np.pi * stiffness(mesh, coupling=1)[0].todense())
         [[ 1.   0.5 -1.   0.5]
          [ 0.5  inf -0.5 -inf]
          [-1.  -0.5  1.  -0.5]
@@ -127,7 +126,7 @@ def stiffness(mat, mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
         >>> net = Net(mat)
         >>> mesh = Mesh(net)
         >>> # print("Timoshenko (Ψ² = 1) = 1 / 2 *")
-        >>> print(4 / np.pi * stiffness(mat, mesh, coupling=1)[0].todense())
+        >>> print(4 / np.pi * stiffness(mesh, coupling=1)[0].todense())
         [[ 1.          0.5        -1.          0.5       ]
          [ 0.5         1.33333333 -0.5        -0.83333333]
          [-1.         -0.5         1.         -0.5       ]
@@ -138,7 +137,7 @@ def stiffness(mat, mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
         >>> net = Net(mat)
         >>> mesh = Mesh(net)
         >>> # print("Euler (Ψ² ≪ 1) = 1 / 12 *")
-        >>> print(4 / np.pi * stiffness(mat, mesh, coupling=1)[0].todense())
+        >>> print(4 / np.pi * stiffness(mesh, coupling=1)[0].todense())
         [[ 12.   6. -12.   6.]
          [  6.   4.  -6.   2.]
          [-12.  -6.  12.  -6.]
@@ -146,12 +145,9 @@ def stiffness(mat, mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
 
     """
     # Optional
-    if mat is None:
-        mat = Mat()
     if mesh is None:
         mesh = Mesh()
 
-    assert Mat.check(mat)
     assert Mesh.check(mesh)
 
     # Get mesh data
@@ -161,6 +157,7 @@ def stiffness(mat, mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
     j = mesh.beam[mask].values
 
     # Get material data
+    mat = mesh.flags.mat
     fiber = mat.loc[fiber]
     l = mesh.s.loc[j].values - mesh.s.loc[i].values
     if lmin is None:
@@ -214,7 +211,7 @@ def stiffness(mat, mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
     return K, u, F, du, dF
 
 
-def constraint(mat, mesh, **kwargs):
+def constraint(mesh, **kwargs):
     r"""
     Assemble the linear constraints.
 
@@ -252,8 +249,6 @@ def constraint(mat, mesh, **kwargs):
 
     Parameters
     ----------
-    mat : pandas.DataFrame
-        Set of fibers represented by a :class:`Mat` object.
     mesh : pandas.DataFrame
         Fiber mesh represented by a :class:`Mesh` object.
 
@@ -278,12 +273,9 @@ def constraint(mat, mesh, **kwargs):
 
     """
     # Optional
-    if mat is None:
-        mat = Mat()
     if mesh is None:
         mesh = Mesh()
 
-    assert Mat.check(mat)
     assert Mesh.check(mesh)
 
     # Get mesh data
@@ -295,6 +287,7 @@ def constraint(mat, mesh, **kwargs):
     I = O + 1  # : one
 
     # Get material data
+    mat = mesh.flags.mat
     mesh["h"] = mat.h.loc[mesh.fiber].values
     zi = mesh.z.loc[i].values
     zj = mesh.z.loc[j].values
@@ -338,14 +331,14 @@ def constraint(mat, mesh, **kwargs):
 
 if __name__ == "__main__":
 
-    from fibermat import *
+    # from fibermat import *
 
     # Linear model (Ψ² ≫ 1)
     mat = Mat(1, length=1, width=1, thickness=1, shear=1, tensile=np.inf)
     net = Net(mat)
     mesh = Mesh(net)
     print("Linear (Ψ² ≫ 1) =")
-    print(4 / np.pi * stiffness(mat, mesh, coupling=1)[0].todense())
+    print(4 / np.pi * stiffness(mesh, coupling=1)[0].todense())
     print()
 
     # Timoshenko model (Ψ² = 1)
@@ -353,7 +346,7 @@ if __name__ == "__main__":
     net = Net(mat)
     mesh = Mesh(net)
     print("Timoshenko (Ψ² = 1) = 1 / 2 *")
-    print(4 / np.pi * stiffness(mat, mesh, coupling=1)[0].todense())
+    print(4 / np.pi * stiffness(mesh, coupling=1)[0].todense())
     print()
 
     # Euler model (Ψ² ≪ 1)
@@ -361,7 +354,7 @@ if __name__ == "__main__":
     net = Net(mat)
     mesh = Mesh(net)
     print("Euler (Ψ² ≪ 1) = 1 / 12 *")
-    print(4 / np.pi * stiffness(mat, mesh, coupling=1)[0].todense())
+    print(4 / np.pi * stiffness(mesh, coupling=1)[0].todense())
     print()
 
     # Generate a set of fibers
@@ -369,13 +362,13 @@ if __name__ == "__main__":
     # Build the fiber network
     net = Net(mat)
     # Stack fibers
-    net = Stack(mat, net)
+    stack = Stack(net)
     # Create the fiber mesh
-    mesh = Mesh(net)
+    mesh = Mesh(stack)
 
     # Assemble the quadratic programming system
-    K, u, F, du, dF = stiffness(mat, mesh)
-    C, f, H, df, dH = constraint(mat, mesh)
+    K, u, F, du, dF = stiffness(mesh)
+    C, f, H, df, dH = constraint(mesh)
     P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
     # Permutation of indices
     perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)

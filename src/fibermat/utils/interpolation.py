@@ -5,6 +5,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
 
+from fibermat import *
+
 
 class Interpolate(interp1d):
     """
@@ -94,7 +96,7 @@ class Interpolate(interp1d):
 
 if __name__ == "__main__":
 
-    from fibermat import *
+    # from fibermat import *
 
     # Reference solution
     x = np.linspace(0, 10, 1001)

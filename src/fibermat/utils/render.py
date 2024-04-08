@@ -8,6 +8,7 @@ from scipy.interpolate import CubicHermiteSpline
 from sklearn.neighbors import KDTree
 from tqdm import tqdm
 
+from fibermat import *
 from fibermat import Mat, Mesh
 
 
@@ -156,7 +157,7 @@ def vtk_mat(mat=None, func=None, verbose=True, **kwargs):
     return pv.MultiBlock(fibers).combine()
 
 
-def vtk_mesh(mat=None, mesh=None,
+def vtk_mesh(mesh=None,
              displacement=None, rotation=None,
              force=None, moment=None,
              verbose=True, **kwargs):
@@ -165,8 +166,6 @@ def vtk_mesh(mat=None, mesh=None,
 
     Parameters
     ----------
-    mat : pandas.DataFrame, optional
-        Set of fibers represented by a :class:`Mat` object.
     mesh : pandas.DataFrame, optional
         Fiber mesh represented by a :class:`Mesh` object.
 
@@ -207,12 +206,9 @@ def vtk_mesh(mat=None, mesh=None,
 
     """
     # Optional
-    if mat is None:
-        mat = Mat()
     if mesh is None:
         mesh = Mesh()
 
-    assert Mat.check(mat)
     assert Mesh.check(mesh)
 
     # Group nodes by fiber
@@ -237,6 +233,7 @@ def vtk_mesh(mat=None, mesh=None,
         msh["node"] = j
 
     # Create a VTK mesh with interpolation data
+    mat = mesh.flags.mat
     msh = vtk_mat(mat, func=interpolation_field, verbose=verbose)
 
     if len(mat):
@@ -285,7 +282,7 @@ def vtk_mesh(mat=None, mesh=None,
 
 if __name__ == "__main__":
 
-    from fibermat import *
+    # from fibermat import *
 
     # Create a VTK fiber
     vtk_fiber().plot()
@@ -295,27 +292,27 @@ if __name__ == "__main__":
     # Build the fiber network
     net = Net(mat, periodic=False)
     # Stack fibers
-    net = Stack(mat, net)
+    stack = Stack(net)
     # Create the fiber mesh
-    mesh = Mesh(net)
+    mesh = Mesh(stack)
 
     # Create a VTK mat
     vtk_mat(mat).plot()
 
     # Create a VTK mesh
-    vtk_mesh(mat, mesh).plot()
+    vtk_mesh(mesh).plot()
 
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
         mesh,
-        stiffness(mat, mesh),
-        constraint(mat, mesh),
+        stiffness(mesh),
+        constraint(mesh),
         packing=4,
     )
 
     # Export as VTK
     msh = vtk_mesh(
-        mat, mesh,
+        mesh,
         displacement(u(1)), rotation(u(1)),
         force(f(1) @ C), torque(f(1) @ C)
     )

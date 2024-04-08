@@ -92,24 +92,24 @@ from fibermat import *
 
 mat = Mat(100)
 net = Net(mat)
-stack = Stack(mat, net)
+stack = Stack(net)
 mesh = Mesh(stack)
 
-K, u, F, du, dF = stiffness(mat, mesh)
-C, f, H, df, dH = constraint(mat, mesh)
+K, u, F, du, dF = stiffness(mesh)
+C, f, H, df, dH = constraint(mesh)
 P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
 
 K, C, u, f, F, H, Z, rlambda, mask, err = solve(
     mesh,
-    stiffness(mat, mesh),
-    constraint(mat, mesh),
+    stiffness(mesh),
+    constraint(mesh),
     packing=4,
     solve=lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=True),
     perm=sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True),
 )
 
 msh = vtk_mesh(
-    mat, mesh,
+    mesh,
     displacement(u(1)), rotation(u(1)),
     force(f(1) @ C), torque(f(1) @ C)
 )

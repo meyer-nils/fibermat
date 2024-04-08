@@ -28,16 +28,16 @@ Example
     # Build the fiber network
     net = Net(mat)
     # Stack fibers
-    net = Stack(mat, net)
+    stack = Stack(net)
     # Create the fiber mesh
-    mesh = Mesh(net)
+    mesh = Mesh(stack)
 
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
         mesh,
-        stiffness(mat, mesh, lmin=0.01, coupling=0.99),
-        constraint(mat, mesh),
-        packing=4, itermax=1000, interp_size=100
+        stiffness(mesh),
+        constraint(mesh),
+        packing=4,
     )
 
     # Deform the mesh

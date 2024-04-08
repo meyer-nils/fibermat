@@ -9,6 +9,7 @@ from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
 from tqdm import tqdm
 
+from fibermat import *
 from fibermat import Mat
 
 
@@ -18,8 +19,8 @@ class Net(pd.DataFrame):
 
     It describes nodes and connections between fibers within a :class:`Mat` object:
 
-        - **nodes** are defined as the nearest points between pairs of fibers.
-        - **connections** link pairs of nodes to define relative positions between fibers.
+        - *nodes* are defined as the nearest points between pairs of fibers.
+        - *connections* link pairs of nodes to define relative positions between fibers.
 
     Parameters
     ----------
@@ -125,12 +126,13 @@ class Net(pd.DataFrame):
         `Net.init`.
 
         """
-        if (len(args) and isinstance(args[0], pd.DataFrame)
-                and not isinstance(args[0], Mat)):
+        if len(args) and Net._is(args[0]):
             # Initialize the DataFrame from argument
             super().__init__(*args, **kwargs)
             # Copy global attributes from argument
             self.attrs = args[0].attrs
+            # Copy global flags from argument
+            self.flags.mat = args[0].flags.mat
 
         else:
             # Initialize the DataFrame from parameters
@@ -268,6 +270,9 @@ class Net(pd.DataFrame):
         net.attrs = mat.attrs
         net.attrs["periodic"] = periodic
 
+        # Set flags
+        net.flags.mat = mat
+
         # Return the `Net` object
         return net
 
@@ -338,6 +343,8 @@ class Net(pd.DataFrame):
                           UserWarning)
             return True
 
+        assert Mat.check(net.flags.mat)
+
         # Keys
         try:
             net[["A", "B", "sA", "sB", "xA", "yA", "zA", "xB", "yB", "zB"]]
@@ -378,6 +385,15 @@ class Net(pd.DataFrame):
         # Return True if the test is correct
         return True
 
+    def _is(self):
+        if self is None:
+            return False
+        try:
+            __class__.check(self)
+            return True
+        except:
+            return False
+
 
 class Stack(Net):
     """
@@ -407,8 +423,6 @@ class Stack(Net):
 
     Parameters
     ----------
-    mat : pandas.DataFrame, optional
-        Set of fibers represented by a :class:`Mat` object.
     net : pandas.DataFrame, optional
         Fiber network represented by a :class:`Net` object.
 
@@ -432,7 +446,7 @@ class Stack(Net):
             >>> # Build the fiber network
             >>> net = Net(mat)
             >>> # Stack fibers
-            >>> stack = Stack(mat, net)
+            >>> stack = Stack(net)
             >>> stack
                   A   B         sA         sB         xA         yA    zA         xB         yB    zB
             0     0   0  12.500000 -12.500000   6.057752  20.856058   0.5  -1.176401  -3.074404   0.5
@@ -515,12 +529,11 @@ class Stack(Net):
         `Stack.init`.
 
         """
-        if (len(args) and isinstance(args[0], pd.DataFrame)
-                and not isinstance(args[0], Mat)):
+        if len(args) and Stack._is(args[0]):
             # Initialize the DataFrame from argument
             super().__init__(*args, **kwargs)
-            # Copy global attributes from argument
-            self.attrs = args[0].attrs
+            # Copy global flags from argument
+            self.flags.mat = args[0].flags.mat
 
         else:
             # Initialize the DataFrame from parameters
@@ -532,14 +545,12 @@ class Stack(Net):
     # ~~~ Constructor ~~~ #
 
     @staticmethod
-    def init(mat=None, net=None, threshold=None, **kwargs):
+    def init(net=None, threshold=None, **kwargs):
         """
         Stack fibers by gravity.
 
         Parameters
         ----------
-        mat : pandas.DataFrame, optional
-            Set of fibers represented by a :class:`Mat` object.
         net : pandas.DataFrame, optional
             Fiber network represented by a :class:`Net` object.
 
@@ -560,16 +571,16 @@ class Stack(Net):
 
         """
         # Optional
-        if mat is None:
-            mat = Mat()
         if net is None:
             net = Net()
 
-        assert Mat.check(mat)
         assert Net.check(net)
 
+        # Get material data
+        mat = net.flags.mat
+
         # Solve the stacking problem
-        linsol = Stack.solve(mat, net, **kwargs)
+        linsol = Stack.solve(net, **kwargs)
 
         if linsol:
             # Update DataFrames
@@ -586,6 +597,11 @@ class Stack(Net):
                 mask[net.A == net.B] = 2
                 net = net[mask > 0]
                 net.reset_index(drop=True, inplace=True)
+                # Add global flags
+                net.flags.mat = mat
+
+        # Set attributes
+        net.attrs["threshold"] = threshold
 
         # Initialize stack DataFrame
         stack = Stack(net)
@@ -605,6 +621,8 @@ class Stack(Net):
                 Box dimensions (mm). By default, the domain is a 50 mm square cube.
             - periodic : bool
                 Boundary periodicity. By default, the domain is periodic.
+            - threshold : float
+                Threshold distance value for proximity detection (mm).
 
         """
         return self._attrs
@@ -654,18 +672,29 @@ class Stack(Net):
         else:
             stack = self
 
+        # Attributes
+        if not ("threshold" in stack.attrs.keys()):
+            raise AttributeError("'threshold' is not in attribute dictionary.")
+
         # Return True if the test is correct
         return Net.check(stack)
 
+    def _is(self):
+        if self is None:
+            return False
+        try:
+            __class__.check(self)
+            return True
+        except:
+            return False
+
     @staticmethod
-    def solve(mat=None, net=None, **kwargs):
+    def solve(net=None, **kwargs):
         """
         Solve the stacking problem.
 
         Parameters
         ----------
-        mat : pandas.DataFrame, optional
-            Set of fibers represented by a :class:`Mat` object.
         net : pandas.DataFrame, optional
             Fiber network represented by a :class:`Net` object.
 
@@ -686,18 +715,15 @@ class Stack(Net):
 
         """
         # Optional
-        if mat is None:
-            mat = Mat()
         if net is None:
             net = Net()
 
-        assert Mat.check(mat)
         assert Net.check(net)
 
         # Assemble the linear programming system
-        C, f, H, h = Stack.constraint(mat, net)
+        C, f, H, h = Stack.constraint(net)
 
-        if len(mat):
+        if net.attrs["n"]:
             # Linear programming solver
             bounds = np.c_[0.5 * h, np.full(len(h), np.inf)]
             # TODO: pass a solver with options as argument instead
@@ -708,7 +734,7 @@ class Stack(Net):
         return linsol
 
     @staticmethod
-    def constraint(mat=None, net=None, **kwargs):
+    def constraint(net=None, **kwargs):
         """
         Assemble the linear system:
 
@@ -721,8 +747,6 @@ class Stack(Net):
 
         Parameters
         ----------
-        mat : pd.DataFrame, optional
-            Set of fibers represented by a :class:`Mat` object.
         net : pd.DataFrame, optional
             Fiber network represented by a :class:`Net` object.
 
@@ -744,12 +768,9 @@ class Stack(Net):
 
         """
         # Optional
-        if mat is None:
-            mat = Mat()
         if net is None:
             net = Net()
 
-        assert Mat.check(mat)
         assert Net.check(net)
 
         # Get network data
@@ -761,6 +782,7 @@ class Stack(Net):
         I = O + 1  # : one
 
         # Get material data
+        mat = net.flags.mat
         h = mat.h.values
 
         # Create constraint data
@@ -787,31 +809,31 @@ class Stack(Net):
 
 if __name__ == "__main__":
 
-    from fibermat import *
+    # from fibermat import *
 
     # Generate a set of fibers
     mat = Mat(10)
     # Build the fiber network
     net = Net(mat)
     # Stack fibers
-    net = Stack(mat, net)
+    stack = Stack(net)
 
     # Get the linear system
-    C, mg, H, h = Stack.constraint(mat, net)
-    linsol = Stack.solve(mat, net)
+    C, mg, H, h = Stack.constraint(net)
+    linsol = Stack.solve(net)
     # Contact force
     f = linsol.ineqlin.marginals
     # Resulting force
     load = 0.5 * f @ np.abs(C) + 0.5 * f @ C
 
     # Check data
-    Stack.check(net)  # or `net.check()`
+    Stack.check(stack)  # or `stack.check()`
     # -> returns True if correct, otherwise it raises an error.
 
     # Normalize by fiber weight
     load /= np.pi / 4 * mat[[*"lbh"]].prod(axis=1).mean()
     # Get loaded nodes
-    points = (net[net.A < net.B][["xA", "yA", "zA", "xB", "yB", "zB"]]
+    points = (stack[stack.A < stack.B][["xA", "yA", "zA", "xB", "yB", "zB"]]
               .values.reshape(-1, 2, 3))
     # Prepare color scale
     cmap = plt.cm.viridis
@@ -835,8 +857,8 @@ if __name__ == "__main__":
         for point in tqdm(points[~np.isclose(f, 0)], desc="Draw nodes"):
             plt.plot(*point.T, '--ok', lw=1, mfc='none', ms=3, alpha=0.2)
     # Set drawing box dimensions
-    ax.set_xlim(-0.5 * net.attrs["size"], 0.5 * net.attrs["size"])
-    ax.set_ylim(-0.5 * net.attrs["size"], 0.5 * net.attrs["size"])
+    ax.set_xlim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])
+    ax.set_ylim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])
     # Add a color bar
     norm = plt.Normalize(vmin=np.min(load), vmax=np.max(load))
     smap = plt.cm.ScalarMappable(cmap=cmap, norm=norm)

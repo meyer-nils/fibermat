@@ -35,6 +35,7 @@ def test_emptyNet():
     net = pd.DataFrame(data=[], index=[], columns=["A", "B", "sA", "sB", "xA", "yA", "zA", "xB", "yB", "zB"], dtype=float)
     net[[*"AB"]] = net[[*"AB"]].astype(int)
     net.attrs = dict(n=0, size=50., periodic=True)
+    net.flags.mat = Mat()
     equal(Net(), net)
 
     assert Net().check()
@@ -74,6 +75,7 @@ def test_Net():
     net = pd.DataFrame(data=data, index=index, columns=["A", "B", "sA", "sB", "xA", "yA", "zA", "xB", "yB", "zB"])
     net[[*"AB"]] = net[[*"AB"]].astype(int)
     net.attrs = dict(n=10, size=50., periodic=True)
+    net.flags.mat = Mat(10)
     equal(Net(Mat(10)), net)
 
     assert Net(net).check()
@@ -86,7 +88,8 @@ def test_emptyStack():
     """
     stack = pd.DataFrame(data=[], index=[], columns=["A", "B", "sA", "sB", "xA", "yA", "zA", "xB", "yB", "zB"], dtype=float)
     stack[[*"AB"]] = stack[[*"AB"]].astype(int)
-    stack.attrs = dict(n=0, size=50., periodic=True)
+    stack.attrs = dict(n=0, size=50., periodic=True, threshold=None)
+    stack.flags.mat = Mat()
     equal(Stack(), stack)
 
     assert Stack().check()
@@ -125,8 +128,9 @@ def test_Stack():
 
     stack = pd.DataFrame(data=data, index=index, columns=["A", "B", "sA", "sB", "xA", "yA", "zA", "xB", "yB", "zB"])
     stack[[*"AB"]] = stack[[*"AB"]].astype(int)
-    stack.attrs = dict(n=10, size=50., periodic=True)
-    equal(Stack(Mat(10), Net(Mat(10))), stack)
+    stack.attrs = dict(n=10, size=50., periodic=True, threshold=None)
+    stack.flags.mat = Mat(10)
+    equal(Stack(Net(Mat(10))), stack)
 
     assert Stack(stack).check()
 
@@ -140,14 +144,14 @@ def test_stack_finite():
     mat.l = np.random.normal(mat.l.mean(), 0.04 * mat.l.mean(), len(mat))
     mat.h = np.random.normal(mat.h.mean(), 0.1 * mat.h.mean(), len(mat))
     net = Net(mat)
-    Stack(mat, net)
+    stack = Stack(net)
 
     # Get material data
     h = mat.h.values
     z = 0.5 * h
 
     # Stack fibers
-    for i, j in net[[*"AB"]][net.A < net.B].values:
+    for i, j in stack[[*"AB"]][stack.A < stack.B].values:
         z[j] = max(z[i] + 0.5 * (h[i] + h[j]), z[j])
 
     if not np.all(mat.z == z):
@@ -163,14 +167,14 @@ def test_stack_periodic():
     mat.l = np.random.normal(mat.l.mean(), 0.04 * mat.l.mean(), len(mat))
     mat.h = np.random.normal(mat.h.mean(), 0.1 * mat.h.mean(), len(mat))
     net = Net(mat)
-    Stack(mat, net)
+    stack = Stack(net)
 
     # Get material data
     h = mat.h.values
     z = 0.5 * h
 
     # Stack fibers
-    for i, j in net[[*"AB"]][net.A < net.B].values:
+    for i, j in stack[[*"AB"]][stack.A < stack.B].values:
         z[j] = max(z[i] + 0.5 * (h[i] + h[j]), z[j])
 
     if not np.all(mat.z == z):

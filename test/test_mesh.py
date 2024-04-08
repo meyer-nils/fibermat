@@ -35,6 +35,7 @@ def test_emptyMesh():
     mesh = pd.DataFrame(data=[], index=[], columns=["fiber", "s", "x", "y", "z", "beam", "constraint"], dtype=float)
     mesh[["fiber", "beam", "constraint"]] = mesh[["fiber", "beam", "constraint"]].astype(int)
     mesh.attrs = dict(n=0, size=50., periodic=True)
+    mesh.flags.mat = Mat()
     equal(Mesh(), mesh)
 
     assert Mesh().check()
@@ -94,6 +95,7 @@ def test_Mesh():
     mesh = pd.DataFrame(data=data, index=index, columns=["fiber", "s", "x", "y", "z", "beam", "constraint"])
     mesh[["fiber", "beam", "constraint"]] = mesh[["fiber", "beam", "constraint"]].astype(int)
     mesh.attrs = dict(n=10, size=50., periodic=True)
+    mesh.flags.mat = Mat(10)
     equal(Mesh(Net(Mat(10))), mesh)
 
     assert Mesh(mesh).check()

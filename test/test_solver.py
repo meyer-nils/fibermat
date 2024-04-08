@@ -27,8 +27,8 @@ def test_solver():
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
         mesh,
-        stiffness(mat, mesh),
-        constraint(mat, mesh),
+        stiffness(mesh),
+        constraint(mesh),
         packing=4,
     )
 
@@ -71,8 +71,8 @@ if __name__ == '__main__':
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
         mesh,
-        stiffness(mat, mesh),
-        constraint(mat, mesh),
+        stiffness(mesh),
+        constraint(mesh),
         packing=4,
     )
 

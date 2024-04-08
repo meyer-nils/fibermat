@@ -35,19 +35,24 @@ mat.y = -y
 # Build the fiber network
 net = Net(mat, periodic=False)
 # Stack fibers
-stack = Stack(mat, net)
+stack = Stack(net)
 # Create the fiber mesh
 mesh = Mesh(stack)
 
 # Solve the mechanical packing problem
-K, C, u, f, F, H, Z, rlambda, mask, err = solver(
-    mat, mesh,
-    packing=4, itermax=10000, lmin=0.01, coupling=0.99, interp_size=100
+K, C, u, f, F, H, Z, rlambda, mask, err = solve(
+    mesh,
+    stiffness(mesh),
+    constraint(mesh),
+    packing=4,
+    itermax=10000
 )
 
 # Export as VTK
-vtk = vtk_mesh(mat, mesh,
-               *u(1).reshape(-1, 2).T,
-               *(f(1) @ C).reshape(-1, 2).T)
-vtk.plot(scalars="force", cmap=plt.cm.twilight_shifted)
-vtk.save("outputs/vtk.vtk")
+msh = vtk_mesh(
+    mesh,
+    displacement(u(1)), rotation(u(1)),
+    force(f(1) @ C), torque(f(1) @ C)
+)
+msh.plot(scalars="force", cmap=plt.cm.twilight_shifted)
+# msh.save("outputs/msh.vtk")

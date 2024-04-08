@@ -5,6 +5,7 @@ import numpy as np
 import scipy as sp
 from scipy.interpolate import interp1d
 
+from fibermat import *
 from fibermat import Mat, Mesh
 
 
@@ -36,18 +37,15 @@ def torque(F):
 # Mechanical model
 ################################################################################
 
-def stiffness(mat, mesh, **kwargs):
+def stiffness(mesh, **kwargs):
     """
     Assemble the quadratic system to be minimized.
 
     """
     # Optional
-    if mat is None:
-        mat = Mat()
     if mesh is None:
         mesh = Mesh()
 
-    assert Mat.check(mat)
     assert Mesh.check(mesh)
 
     # Get mesh data
@@ -57,6 +55,7 @@ def stiffness(mat, mesh, **kwargs):
     j = mesh.beam[mask].values
 
     # Get material data
+    mat = mesh.flags.mat
     fiber = mat.loc[fiber]
     l = mesh.s.loc[j].values - mesh.s.loc[i].values
 
@@ -92,18 +91,15 @@ def stiffness(mat, mesh, **kwargs):
     return K, u, F, du, dF
 
 
-def constraint(mat, mesh, **kwargs):
+def constraint(mesh, **kwargs):
     """
     Assemble the linear constraints.
 
     """
     # Optional
-    if mat is None:
-        mat = Mat()
     if mesh is None:
         mesh = Mesh()
 
-    assert Mat.check(mat)
     assert Mesh.check(mesh)
 
     # Get mesh data
@@ -115,6 +111,7 @@ def constraint(mat, mesh, **kwargs):
     I = O + 1  # : one
 
     # Get material data
+    mat = mesh.flags.mat
     mesh["h"] = mat.h.loc[mesh.fiber].values
     zi = mesh.z.loc[i].values
     zj = mesh.z.loc[j].values
@@ -165,13 +162,13 @@ if __name__ == "__main__":
     # Build the fiber network
     net = Net(mat)
     # Stack fibers
-    stack = Stack(mat, net)
+    stack = Stack(net)
     # Create the fiber mesh
     mesh = Mesh(stack)
 
     # Assemble the quadratic programming system
-    K, u, F, du, dF = stiffness(mat, mesh)
-    C, f, H, df, dH = constraint(mat, mesh)
+    K, u, F, du, dF = stiffness(mesh)
+    C, f, H, df, dH = constraint(mesh)
     P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
     # Permutation of indices
     perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
@@ -186,8 +183,8 @@ if __name__ == "__main__":
     # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
         mesh,
-        stiffness(mat, mesh),
-        constraint(mat, mesh),
+        stiffness(mesh),
+        constraint(mesh),
         packing=4,
         solve=spsolve,
         perm=perm,
@@ -201,7 +198,7 @@ if __name__ == "__main__":
 
     # Export as VTK
     msh = vtk_mesh(
-        mat, mesh,
+        mesh,
         displacement(u(1)), rotation(u(1)),
         force(f(1) @ C), torque(f(1) @ C)
     )

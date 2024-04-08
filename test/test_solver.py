@@ -25,12 +25,7 @@ def test_solver():
     mesh = Mesh(net)
 
     # Solve the mechanical packing problem
-    K, C, u, f, F, H, Z, rlambda, mask, err = solve(
-        mesh,
-        stiffness(mesh),
-        constraint(mesh),
-        packing=4,
-    )
+    K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
 
     assert np.allclose(
         f(1) @ C,
@@ -69,12 +64,7 @@ if __name__ == '__main__':
     mesh = Mesh(net)
 
     # Solve the mechanical packing problem
-    K, C, u, f, F, H, Z, rlambda, mask, err = solve(
-        mesh,
-        stiffness(mesh),
-        constraint(mesh),
-        packing=4,
-    )
+    K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
 
     # Deform the mesh
     mesh.z += u(1)[::2]

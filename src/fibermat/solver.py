@@ -187,13 +187,16 @@ def solve(mesh, stiffness, constraint, packing=1., itermax=1000,
             mask = (np.real(q - P @ x) <= tol)
             mask &= np.array(np.sum(np.abs(np.real(P)), axis=0) > 0).ravel()
             # Solve linear problem
-            # dx[mask] += np.real(solve(P[np.ix_(mask, mask)], dq[mask]))
-            dx[perm[mask[perm]]] = np.real(
-                solve(
-                    P[np.ix_(perm[mask[perm]], perm[mask[perm]])],
-                    dq[perm[mask[perm]]]
+            try:
+                # dx[mask] += np.real(solve(P[np.ix_(mask, mask)], dq[mask]))
+                dx[perm[mask[perm]]] = np.real(
+                    solve(
+                        P[np.ix_(perm[mask[perm]], perm[mask[perm]])],
+                        dq[perm[mask[perm]]]
+                    )
                 )
-            )
+            except RuntimeError:
+                break
             # Calculate error
             err = np.linalg.norm(P[np.ix_(mask, mask)] @ dx[mask] - dq[mask])
             # Calculate evolution

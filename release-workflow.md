@@ -50,8 +50,16 @@
 
 8. Release Package on PyPi.
 
-    - Use the following command to upload the distribution files (see [PyPi Guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/)):
-    ```shell
-    twine upload dist/*
+    - Use the following commands to upload the distribution files (see [PyPi Guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/)):
 
-    ```
+        + For the test repository:
+        ```shell
+        twine upload --repository testpypi dist/*
+
+        ```
+
+        + For the official repository:
+        ```shell
+        twine upload dist/*
+
+        ```

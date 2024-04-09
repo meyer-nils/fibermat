@@ -67,30 +67,40 @@ Mahé, F. (2023). Statistical mechanical framework for discontinuous composites:
 if __name__ == "__main__":
 
     from fibermat import *
+    # from fibermat.model.shear import *
 
-    # Generate a set of fibers
-    mat = Mat(100, length=25, width=2, thickness=0.5, tensile=2500)
-    # Build the fiber network
+    mat = Mat(100, length=25, width=2, thickness=0.5, shear=1, tensile=2500)
     net = Net(mat, periodic=True)
-    # Stack fibers
     stack = Stack(net, threshold=10)
-    # Create the fiber mesh
     mesh = Mesh(stack)
 
     # Assemble the quadratic programming system
     K, u, F, du, dF = stiffness(mesh)
     C, f, H, df, dH = constraint(mesh)
     P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
+    # Permutation of indices
+    perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
+    # Visualize the system
+    _, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
+    plot_system((K, u, F, du, dF), (C, f, H, df, dH), perm=None, ax=ax[0])
+    plot_system((K, u, F, du, dF), (C, f, H, df, dH), perm=perm, ax=ax[1])
+    plt.show()
 
-    # Solve the mechanical packing problem
     K, C, u, f, F, H, Z, rlambda, mask, err = solve(
         mesh,
+        stiffness(mesh, lmin=0.01, coupling=0.99),
+        constraint(mesh),
         packing=4,
         solve=lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=False),
         perm=sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True),
     )
 
-    # Export as VTK
+    # Visualize system evolution
+    _, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
+    plot_system((K, u(0), F(0), du, dF), (C, f(0), H(0), df, dH), ax=ax[0])
+    plot_system((K, u(1), F(1), du, dF), (C, f(1), H(1), df, dH), ax=ax[1])
+    plt.show()
+
     msh = vtk_mesh(
         mesh,
         displacement(u(1)),
@@ -99,4 +109,3 @@ if __name__ == "__main__":
         torque(f(1) @ C),
     )
     msh.plot(scalars="force", cmap=plt.cm.twilight_shifted)
-    msh.save("outputs/msh.vtk")

@@ -198,7 +198,7 @@ See the tutorial in `jupyter-notebook.ipynb`.
 from fibermat import *
 
 # Generate a set of fibers
-mat = Mat(100, length=25, width=2, thickness=0.5, tensile=2500)
+mat = Mat(100, length=25, width=2, thickness=0.5, shear=1, tensile=2500)
 # Build the fiber network
 net = Net(mat, periodic=True)
 # Stack fibers

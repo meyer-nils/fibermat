@@ -13,22 +13,22 @@ from fibermat import Mat, Mesh
 # Degrees of Freedom
 ################################################################################
 
-def displacement(u):
+def displacement(u: np.ndarray):
     """ Return nodal displacements."""
     return u[..., ::2]
 
 
-def rotation(u):
+def rotation(u: np.ndarray):
     """ Return nodal rotations."""
     return u[..., 1::2]
 
 
-def force(F):
+def force(F: np.ndarray):
     """ Return nodal forces."""
     return F[..., ::2]
 
 
-def torque(F):
+def torque(F: np.ndarray):
     """ Return nodal torques."""
     return F[..., 1::2]
 

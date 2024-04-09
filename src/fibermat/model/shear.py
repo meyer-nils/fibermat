@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import numpy
 import numpy as np
 import scipy as sp
 from scipy.interpolate import interp1d
@@ -13,22 +13,22 @@ from fibermat import Mat, Mesh
 # Degrees of Freedom
 ################################################################################
 
-def displacement(u):
+def displacement(u: np.ndarray):
     """ Return nodal displacements."""
     return u[...]
 
 
-def rotation(u):
+def rotation(u: np.ndarray):
     """ Return nodal rotations."""
     return np.zeros_like(u)
 
 
-def force(F):
+def force(F: np.ndarray):
     """ Return nodal forces."""
     return F[...]
 
 
-def torque(F):
+def torque(F: np.ndarray):
     """ Return nodal torques."""
     return np.zeros_like(F)
 

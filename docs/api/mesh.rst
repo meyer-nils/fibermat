@@ -20,7 +20,7 @@ Example
     # Generate a set of fibers
     mat = Mat(100)
     # Build the fiber network
-    net = Net(mat, periodic=True)
+    net = Net(mat)
     # Create the fiber mesh
     mesh = Mesh(net)
 

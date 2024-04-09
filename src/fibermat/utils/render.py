@@ -290,7 +290,7 @@ if __name__ == "__main__":
     # Generate a set of fibers
     mat = Mat(10)
     # Build the fiber network
-    net = Net(mat, periodic=False)
+    net = Net(mat)
     # Stack fibers
     stack = Stack(net)
     # Create the fiber mesh

@@ -242,7 +242,7 @@ def vtk_mesh(mesh=None,
         x = msh["node"]
         if displacement is not None:
             if rotation is None:
-                rotation = 0 * displacement
+                rotation = np.zeros_like(displacement)
             displacement = CubicHermiteSpline(s, displacement, rotation)
             msh["displacement"] = np.zeros(msh.points.shape)
             msh["displacement"][:, 2] = displacement(x)

@@ -13,16 +13,15 @@ from fibermat import *
 class Mat(pd.DataFrame):
     """
     A class inherited from pandas.DataFrame_ **to describe a fibrous material**
-    made up of a set of random fibers.
+    made up of a set of random fibers / fiber bundles.
 
     It defines:
-
         - the *geometry* of the straight fibers.
         - the *initial configuration* (positions and orientations).
         - the *material properties*.
 
-    Parameters
-    ----------
+    Parameters:
+    -----------
     n : int, optional
         Number of fibers. Default is 0.
     length : float, optional
@@ -44,11 +43,6 @@ class Mat(pd.DataFrame):
     seed : int, optional
         Random seed for reproducibility. Default is 0.
 
-    Other Parameters
-    ----------------
-    _ :
-        Additional keyword arguments ignored by the function.
-
     .. NOTE::
         The constructor calls :meth:`init` method if the object is instantiated with parameters.
         Otherwise, initialization is performed with the pandas.DataFrame_ constructor.
@@ -56,7 +50,6 @@ class Mat(pd.DataFrame):
     .. _pandas.DataFrame: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html
 
     :Use:
-
         >>> # Generate a set of fibers
         >>> mat = Mat(100)
         >>> mat
@@ -75,8 +68,8 @@ class Mat(pd.DataFrame):
         <BLANKLINE>
         [100 rows x 11 columns]
 
-    Data
-    ----
+    Data:
+    -----
     + index : pandas.Index
         Fiber label. Each label refers to a unique fiber.
     + Fiber dimensions:
@@ -126,7 +119,7 @@ class Mat(pd.DataFrame):
 
     def __init__(self, *args, **kwargs):
         """
-        Initialize the `Mat` object.
+        Initialize the :class:`Mat` object.
 
         Parameters
         ----------
@@ -254,7 +247,7 @@ class Mat(pd.DataFrame):
 
     # ~~~ Public methods ~~~ #
 
-    def check(self):
+    def check(self: pd.DataFrame):
         """
         Check that a :class:`Mat` object is defined correctly.
 
@@ -342,7 +335,7 @@ class Mat(pd.DataFrame):
 
     # ~~~ Private methods ~~~ #
 
-    def _is(self):
+    def _is(self: pd.DataFrame) -> bool:
         if self is None:
             return False
         try:

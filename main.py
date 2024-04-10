@@ -67,14 +67,14 @@ Mahé, F. (2023). Statistical mechanical framework for discontinuous composites:
 if __name__ == "__main__":
 
     from fibermat import *
-    # from fibermat.model.shear import *
 
     mat = Mat(100, length=25, width=2, thickness=0.5, shear=1, tensile=2500)
     net = Net(mat, periodic=True)
     stack = Stack(net, threshold=10)
     mesh = Mesh(stack)
-    model = Timoshenko(mesh)
 
+    # Instantiate the model
+    model = Timoshenko(mesh)
     # Permutation of indices
     perm = sp.sparse.csgraph.reverse_cuthill_mckee(model.P, symmetric_mode=True)
     # Visualize the system
@@ -84,10 +84,10 @@ if __name__ == "__main__":
     plt.show()
 
     sol = solve(
-        model,
+        Timoshenko(mesh),
         packing=4,
         solve=lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=False),
-        perm=sp.sparse.csgraph.reverse_cuthill_mckee(model.P, symmetric_mode=True),
+        perm=sp.sparse.csgraph.reverse_cuthill_mckee(Timoshenko(mesh).P, symmetric_mode=True),
     )
 
     # Visualize system evolution

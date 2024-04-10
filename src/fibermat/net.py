@@ -18,23 +18,20 @@ class Net(pd.DataFrame):
     A class inherited from pandas.DataFrame_ **to build a fiber network**.
 
     It describes nodes and connections between fibers within a :class:`~.Mat` object:
-
         - *nodes* are defined as the nearest points between pairs of fibers.
         - *connections* link pairs of nodes to define relative positions between fibers.
 
-    Parameters
-    ----------
+    Parameters:
+    -----------
     mat : pandas.DataFrame, optional
         Set of fibers represented by a :class:`~.Mat` object.
-
-    Other Parameters
-    ----------------
     periodic : bool, optional
         If True, fibers are duplicated for periodicity. Default is True.
+
+    Other Parameters:
+    -----------------
     pairs : numpy.ndarray, optional
         Pairs of fiber indices used to find nearest points. Size: (m x 2).
-    _ :
-        Additional keyword arguments ignored by the function.
 
     .. NOTE::
         The constructor calls :meth:`init` method if the object is instantiated with parameters.
@@ -43,7 +40,6 @@ class Net(pd.DataFrame):
     .. _pandas.DataFrame: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html
 
     :Use:
-
         >>> # Generate a set of fibers
         >>> mat = Mat(100)
         >>> # Build the fiber network
@@ -64,15 +60,15 @@ class Net(pd.DataFrame):
         <BLANKLINE>
         [867 rows x 10 columns]
 
-    Data
-    ----
+    Data:
+    -----
     + index : pandas.Index
         Connection label. Each label refers to a unique connection.
     + Pair of fibers:
         - A : pandas.Series
-            First fiber label. It must satisfy `net.A` ≤ `net.B`.
+            1ˢᵗ fiber label. It must satisfy `net.A` ≤ `net.B`.
         - B : pandas.Series
-            Second fiber label. It must satisfy `net.A` ≤ `net.B`.
+            2ⁿᵈ fiber label. It must satisfy `net.A` ≤ `net.B`.
     + Curvilinear abscissa:
         - sA : pandas.Series
             Curvilinear abscissa of node along the first fiber (mm).
@@ -112,7 +108,7 @@ class Net(pd.DataFrame):
 
     def __init__(self, *args, **kwargs):
         """
-        Initialize the `Net` object.
+        Initialize the :class:`Net` object.
 
         Parameters
         ----------
@@ -298,7 +294,7 @@ class Net(pd.DataFrame):
 
     # ~~~ Public methods ~~~ #
 
-    def check(self):
+    def check(self: pd.DataFrame):
         """
         Check that a :class:`Net` object is defined correctly.
 
@@ -387,7 +383,7 @@ class Net(pd.DataFrame):
 
     # ~~~ Private methods ~~~ #
 
-    def _is(self):
+    def _is(self: pd.DataFrame) -> bool:
         if self is None:
             return False
         try:
@@ -415,21 +411,21 @@ class Stack(Net):
         - 𝐟 is the vector of fiber weights (with 𝐦 : fiber masses, 𝑔 gravity).
         - 𝐡 is the vector of fiber thicknesses.
         - ℂ is the matrix of inequality constraints that positions must satisfy to prevent the fibers from crossing each other.
-        - -𝐇 corresponds to the minimum distances between the pairs of fibers.
+        - -𝐇 is the vector of minimum distances between the pairs of fibers.
 
-    *Non-penetration conditions* between two fibers give the expressions for the rows of ℂ and 𝐇:
+    *Non-penetration conditions* between two fibers give expressions for the rows of ℂ and 𝐇:
 
     .. MATH::
         z_B - z_A \geq (h_A + h_B) \, / \, 2
         \quad \Leftrightarrow \quad z_A - z_B \leq - (h_A + h_B) \, / \, 2
 
-    Parameters
-    ----------
+    Parameters:
+    -----------
     net : pandas.DataFrame, optional
         Fiber network represented by a :class:`Net` object.
 
-    Other Parameters
-    ----------------
+    Other Parameters:
+    -----------------
     threshold : float, optional
         Threshold distance value for proximity detection (mm).
     kwargs :
@@ -442,7 +438,6 @@ class Stack(Net):
     .. _pandas.DataFrame: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html
 
         :Use:
-
             >>> # Generate a set of fibers
             >>> mat = Mat(100)
             >>> # Build the fiber network
@@ -465,15 +460,15 @@ class Stack(Net):
             <BLANKLINE>
             [867 rows x 10 columns]
 
-    Data
-    ----
+    Data:
+    -----
     + index : pandas.Index
         Connection label. Each label refers to a unique connection.
     + Pair of fibers:
         - A : pandas.Series
-            First fiber label. It must satisfy `net.A` ≤ `net.B`.
+            1ˢᵗ fiber label. It must satisfy `net.A` ≤ `net.B`.
         - B : pandas.Series
-            Second fiber label. It must satisfy `net.A` ≤ `net.B`.
+            2ⁿᵈ fiber label. It must satisfy `net.A` ≤ `net.B`.
     + Curvilinear abscissa:
         - sA : pandas.Series
             Curvilinear abscissa of node along the first fiber (mm).
@@ -517,7 +512,7 @@ class Stack(Net):
 
     def __init__(self, *args, **kwargs):
         """
-        Initialize the `Stack` object.
+        Initialize the :class:`Stack` object.
 
         Parameters
         ----------
@@ -635,7 +630,7 @@ class Stack(Net):
 
     # ~~~ Public methods ~~~ #
 
-    def check(self):
+    def check(self: pd.DataFrame):
         """
         Check that a :class:`Stack` object is defined correctly.
 
@@ -683,7 +678,7 @@ class Stack(Net):
 
     # ~~~ Private methods ~~~ #
 
-    def _is(self):
+    def _is(self: pd.DataFrame) -> bool:
         if self is None:
             return False
         try:
@@ -730,7 +725,6 @@ class Stack(Net):
         if net.attrs["n"]:
             # Linear programming solver
             bounds = np.c_[0.5 * h, np.full(len(h), np.inf)]
-            # TODO: pass a solver with options as argument instead
             linsol = sp.optimize.linprog(f, C, H, bounds=bounds, method='highs', **kwargs)
         else:
             linsol = None

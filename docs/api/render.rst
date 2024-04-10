@@ -44,22 +44,22 @@ Example
     # Create the fiber mesh
     mesh = Mesh(stack)
 
+    # Solve the mechanical packing problem
+    sol = solve(Timoshenko(mesh), packing=4)
+
     # Create a VTK mat
     vtk_mat(mat).plot()
 
     # Create a VTK mesh
     vtk_mesh(mesh).plot()
 
-    # Solve the mechanical packing problem
-    K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
-
     # Export as VTK
     msh = vtk_mesh(
         mesh,
-        displacement(u(1)),
-        rotation(u(1)),
-        force(f(1) @ C),
-        torque(f(1) @ C),
+        sol.displacement(1),
+        sol.rotation(1),
+        sol.force(1),
+        sol.torque(1),
     )
     msh.plot(scalars="force", cmap=plt.cm.twilight_shifted)
 

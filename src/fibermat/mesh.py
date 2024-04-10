@@ -17,19 +17,13 @@ class Mesh(pd.DataFrame):
     for a set of discontinuous fibers.
 
     It defines:
-
         - the *beam* elements (intra-fiber connections).
         - the *constraint* elements (inter-fiber connections).
 
-    Parameters
-    ----------
+    Parameters:
+    -----------
     net : pandas.DataFrame, optional
          Fiber network represented by a :class:`~.Net` object.
-
-    Other Parameters
-    ----------------
-    _ :
-        Additional keyword arguments ignored by the function.
 
     .. NOTE::
         The constructor calls :meth:`init` method if the object is instantiated with parameters.
@@ -38,7 +32,6 @@ class Mesh(pd.DataFrame):
     .. _pandas.DataFrame: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html
 
     :Use:
-
         >>> # Generate a set of fibers
         >>> mat = Mat(100)
         >>> # Build the fiber network
@@ -61,8 +54,8 @@ class Mesh(pd.DataFrame):
         <BLANKLINE>
         [1734 rows x 7 columns]
 
-    Data
-    ----
+    Data:
+    -----
     + index : pandas.Index
         Node label. Each label refers to a unique node.
     + Node:
@@ -103,7 +96,7 @@ class Mesh(pd.DataFrame):
 
     def __init__(self, *args, **kwargs):
         """
-        Initialize the `Mesh` object.
+        Initialize the :class:`Mesh` object.
 
         Parameters
         ----------
@@ -229,7 +222,7 @@ class Mesh(pd.DataFrame):
 
     # ~~~ Public methods ~~~ #
 
-    def check(self):
+    def check(self: pd.DataFrame):
         """
         Check that a :class:`Mesh` object is defined correctly.
 
@@ -338,7 +331,7 @@ class Mesh(pd.DataFrame):
 
     # ~~~ Private methods ~~~ #
 
-    def _is(self):
+    def _is(self: pd.DataFrame) -> bool:
         if self is None:
             return False
         try:

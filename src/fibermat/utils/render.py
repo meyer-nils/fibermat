@@ -179,13 +179,13 @@ def vtk_mesh(mesh=None,
     Other Parameters
     ----------------
     displacement : numpy.ndarray, optional
-        Displacement field.
+        Nodal displacements.
     rotation : numpy.ndarray, optional
-        Rotation field.
+        Nodal rotations.
     force : numpy.ndarray, optional
-        Load field.
+        Nodal forces.
     torque : numpy.ndarray, optional
-        Torque field.
+        Nodal torques.
     verbose : bool, optional
         If True, a progress bar is displayed. Default is True.
     kwargs :

@@ -36,15 +36,15 @@ def solve(model, packing=1., itermax=1000,
 
     where:
         - 𝐮 is the vector of generalized displacements (*unknowns of the problem*).
-        - 𝐟 is the vector of generalized forces (*unknown Lagrange multipliers*).
+        - 𝐟 is the vector of internal forces (*unknown Lagrange multipliers*).
         - 𝕂 is the stiffness matrix of the fiber set.
-        - 𝐅 is the vector of external efforts.
+        - 𝐅 is the vector of external forces.
         - ℂ is the matrix of non-penetration constraints.
-        - 𝐇 is the vector of minimal distances between fibers (minimal distances).
+        - 𝐇 is the vector of minimum distances between fibers.
 
     The *mechanical equilibrium* allows reformulating the problem as a system of inequalities:
 
-    .. MATH::
+    .. MATH::s
         \Rightarrow \quad \left[\begin{matrix}
             \mathbb{K} & \mathbb{C}^T \\
             \mathbb{C} & 0
@@ -55,13 +55,13 @@ def solve(model, packing=1., itermax=1000,
 
     .. HINT::
         Models used to build the matrices are implemented in :ref:`🔧 Model`:
-            - 𝕂 and 𝐅 : :func:`~.model.timoshenko.stiffness`.
-            - ℂ and 𝐇 : :func:`~.model.timoshenko.constraint`.
+            - 𝕂 and 𝐅 : :func:`~.model.timoshenko.Timoshenko.stiffness`.
+            - ℂ and 𝐇 : :func:`~.model.timoshenko.Timoshenko.constraint`.
 
     Parameters
     ----------
     model : Model
-        Mechanical model object. If None, :class:`~.Timoshenko` model is used.
+        Mechanical model object as :class:`~.Timoshenko` model.
     packing : float, optional
         Targeted value of packing. Must be greater than 1. Default is 1.0.
     itermax : int, optional
@@ -70,11 +70,26 @@ def solve(model, packing=1., itermax=1000,
     Returns
     -------
     model : Model
-        Solved model with interpolated solution.
-        TODO: describe interpolation attributes
+        Solved model with interpolated solution:
+            - u : Interpolate
+                Generalized displacement vector.
+            - f : Interpolate
+                Internal force vector.
+            - F : Interpolate
+                External force vector.
+            - H : Interpolate
+                Minimum distance vector.
+            - displacement : Interpolate
+                Nodal displacements.
+            - rotation : Interpolate
+                Nodal rotations.
+            - force : Interpolate
+                Nodal forces.
+            - torque : Interpolate
+                Nodal torques.
 
     .. SEEALSO::
-        Simulation results are given as functions of a pseudo-time parameter (between 0 and 1) using :class:`~.interpolation.Interpolate` objects.
+        Simulation results in the model are given as functions of a pseudo-time parameter (between 0 and 1) using :class:`~.interpolation.Interpolate` objects.
 
     Other Parameters
     ----------------
@@ -96,17 +111,14 @@ def solve(model, packing=1., itermax=1000,
         Additional keyword arguments ignored by the function.
 
     :Use:
-
         >>> # Generate a set of fibers
         >>> mat = Mat(100)
         >>> # Build the fiber network
         >>> net = Net(mat)
         >>> # Create the fiber mesh
         >>> mesh = Mesh(net)
-        >>> # Instantiate the model
-        >>> model = Timoshenko(mesh)
         >>> # Solve the mechanical packing problem
-        >>> sol = solve(model, packing=4)
+        >>> sol = solve(Timoshenko(mesh), packing=4)
 
     """
     # Assemble the quadratic programming system
@@ -117,7 +129,6 @@ def solve(model, packing=1., itermax=1000,
 
     x_ = [x.copy()]
     q_ = [q.copy()]
-    # TODO: put inside the model
     Z_ = [(mesh.z.values + 0.5 * mesh.h.values).max()]
     rlambda_ = [1.0]
     err_ = [0]
@@ -204,24 +215,24 @@ def plot_system(stiffness, constraint,
         K : sparse matrix
             Stiffness matrix (symmetric positive-semi definite).
         u : numpy.ndarray
-            Displacement vector.
+            Generalized displacement vector.
         F : numpy.ndarray
-            Load vector.
+            External force vector.
         du : numpy.ndarray
-            Incremental displacement vector.
+            Increment of displacement vector.
         dF : numpy.ndarray
-            Incremental load vector.
+            Increment of external force vector.
     constraint : tuple
         C : sparse matrix
             Constraint matrix.
         f : numpy.ndarray
-            Force vector.
+            Internal force vector.
         H : numpy.ndarray
-            Upper-bound vector.
+            Minimum distance vector.
         df : numpy.ndarray
-            Incremental force vector.
+            Increment of internal force vector.
         dH : numpy.ndarray
-            Incremental upper-bound vector.
+            Increment of distance vector.
 
     Returns
     -------

@@ -12,6 +12,82 @@ from fibermat.utils.interpolation import Interpolate
 
 
 class Timoshenko:
+    r"""
+    Mechanical model based on Timoshenko beam theory.
+
+    It builds the system of inequalities:
+
+    .. MATH::
+        \Rightarrow \quad \left[\begin{matrix}
+            \mathbb{K} & \mathbb{C}^T \\
+            \mathbb{C} & 0
+        \end{matrix}\right] \binom{\mathbf{u}}{\mathbf{f}}
+            \leq \binom{\mathbf{F}}{\mathbf{H}}
+
+    where:
+        - 𝕂 is the stiffness matrix of the fiber set.
+        - ℂ is the matrix of non-penetration constraints.
+        - 𝐮 is the vector of generalized displacements (*unknowns of the problem*).
+        - 𝐟 is the vector of internal forces (*unknown Lagrange multipliers*).
+        - 𝐅 is the vector of external forces.
+        - 𝐇 is the vector of minimum distances between fibers.
+
+    Parameters:
+    -----------
+    mesh : pandas.DataFrame, optional
+        Fiber mesh represented by a :class:`~.Mesh` object.
+
+    ----
+
+    Attributes
+    ----------
+    `K` :
+        Stiffness matrix (symmetric positive-semi definite).
+    `C` :
+        Constraint matrix.
+    `P` :
+        Linear system.
+    `x` :
+        Solution vector.
+    `dx` :
+        Unknown vector.
+    `q` :
+        Upper-bound vector.
+    `dq` :
+        Increment vector.
+    :attr:`u` :
+        Generalized displacement vector.
+    :attr:`f` :
+        Internal force vector.
+    :attr:`F` :
+        External force vector.
+    :attr:`H` :
+        Minimum distance vector.
+    :attr:`displacement` :
+        Nodal displacements.
+    :attr:`rotation` :
+        Nodal rotations.
+    :attr:`force` :
+        Nodal forces.
+    :attr:`torque` :
+        Nodal torques.
+
+    Methods
+    -------
+    :meth:`__call__` :
+        Update mesh and return the quadratic programming problem.
+    :meth:`copy` :
+        Return a copy of the model.
+    :meth:`set` :
+        Calculate interpolated solution.
+    :meth:`stiffness` :
+        Assemble the quadratic system to be minimized.
+    :meth:`constraint` :
+        Assemble the linear constraints.
+
+    ----
+
+    """
 
     def __init__(self, mesh=None, **kwargs):
         """
@@ -38,19 +114,19 @@ class Timoshenko:
             K, u, F, du, dF = self.stiffness(**kwargs)
             C, f, H, df, dH = self.constraint(**kwargs)
             P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
-            x = np.r_[u, f]  # : solution vector
-            q = np.r_[F, H]  # : upper-bound vector
-            dx = np.r_[du, df]  # : unknown vector
-            dq = np.r_[dF, dH]  # : right-hand side vector
+            x = np.r_[u, f]
+            q = np.r_[F, H]
+            dx = np.r_[du, df]
+            dq = np.r_[dF, dH]
 
             # Add attributes
-            self.K = K
-            self.C = C
-            self.P = P
-            self.x = x
-            self.q = q
-            self.dx = dx
-            self.dq = dq
+            self.K = K  # : stiffness matrix
+            self.C = C  # : constraint matrix
+            self.P = P  # : linear system
+            self.x = x  # : solution vector
+            self.q = q  # : upper-bound vector
+            self.dx = dx  # : unknown vector
+            self.dq = dq  # : increment vector
 
     # ~~~ Private methods ~~~ #
 
@@ -68,21 +144,21 @@ class Timoshenko:
         # Return quadratic programming system
         return self.mesh, self.P, self.x, self.q, self.dx, self.dq
 
+    def copy(self):
+        """ Return a copy of the model."""
+        return copy(self)
+
     def set(self, x_, q_, **kwargs):
         """ Calculate interpolated solution."""
         self.x = Interpolate(x_, **kwargs)
         self.q = Interpolate(q_, **kwargs)
-
-    def copy(self):
-        " Return a copy of the model."
-        return copy(self)
 
     ############################################################################
     # Degrees of Freedom
     ############################################################################
 
     def u(self, t: np.ndarray = None):
-        """ Return displacement vector."""
+        """ Return generalized displacement vector."""
         return self._split(self.x(t))[0]
 
     def f(self, t: np.ndarray = None):
@@ -94,7 +170,7 @@ class Timoshenko:
         return self._split(self.q(t))[0]
 
     def H(self, t: np.ndarray = None):
-        """ Return minimal distance vector."""
+        """ Return minimum distance vector."""
         return self._split(self.q(t))[1]
 
     def displacement(self, t: np.ndarray = None):
@@ -121,7 +197,7 @@ class Timoshenko:
         r"""
         Assemble the quadratic system to be minimized.
 
-        The mechanical model is built using a **Timoshenko beam law** [1]_:
+        The mechanical model is built using **Timoshenko's beam theory** [1]_:
 
         .. MATH::
             \mathbb{K}_e = \frac{Gbh}{l_e} \cdot \frac{\pi / 4}{1 + \frac{G}{E} \left( \frac{l_e}{h} \right)^2}
@@ -145,7 +221,7 @@ class Timoshenko:
             - 𝐺 is the shear modulus.
             - 𝑏 and h are the width and thickness of the fiber.
 
-        The displacement vector :math:`\mathbf{u} = (\dots, u_i, \theta_i, \dots)`
+        The generalized displacement vector :math:`\mathbf{u} = (\dots, u_i, \theta_i, \dots)`
         (with 𝑢ᵢ being the vertical displacement and θᵢ the rotation of the cross-section of the i-th node)
         satisfies *mechanical equilibrium*:
 
@@ -156,22 +232,27 @@ class Timoshenko:
 
         .. [1] `Timoshenko–Ehrenfest beam theory, Wikipedia <https://en.wikipedia.org/wiki/Timoshenko%E2%80%93Ehrenfest_beam_theory>`_.
 
-        Returns
-        -------
+        Parameters:
+        -----------
+        t : array-like, optional
+            Interpolation parameter between 0 and 1.
+
+        Returns:
+        --------
         tuple
             K : sparse matrix
                 Stiffness matrix (symmetric positive-semi definite).
             u : numpy.ndarray
-                Displacement vector.
+                Generalized displacement vector.
             F : numpy.ndarray
-                Load vector.
+                External force vector.
             du : numpy.ndarray
-                Incremental displacement vector.
+                Increment of displacement vector.
             dF : numpy.ndarray
-                Incremental load vector.
+                Increment of external force vector.
 
-        Other Parameters
-        ----------------
+        Other Parameters:
+        -----------------
         lmin : float, optional
             Lower bound used to rescale beam lengths (mm). Default is 0.01 mm.
         lmax : float, optional
@@ -182,7 +263,6 @@ class Timoshenko:
             Additional keyword arguments ignored by the function.
 
         :Use:
-
             >>> # Linear model (Ψ² ≫ 1)
             >>> mat = Mat(1, length=1, width=1, thickness=1, shear=1, tensile=np.inf)
             >>> net = Net(mat)
@@ -326,22 +406,27 @@ class Timoshenko:
 
         .. [2] `Karush–Kuhn–Tucker conditions, Wikipedia <https://en.wikipedia.org/wiki/Karush%E2%80%93Kuhn%E2%80%93Tucker_conditions>`_.
 
-        Returns
-        -------
+        Parameters:
+        -----------
+        t : array-like, optional
+            Interpolation parameter between 0 and 1.
+
+        Returns:
+        --------
         tuple
             C : sparse matrix
                 Constraint matrix.
             f : numpy.ndarray
-                Force vector.
+                Internal force vector.
             H : numpy.ndarray
-                Upper-bound vector.
+                Minimum distance vector.
             df : numpy.ndarray
-                Incremental force vector.
+                Increment of internal force vector.
             dH : numpy.ndarray
-                Incremental upper-bound vector.
+                Increment of distance vector.
 
-        Other Parameters
-        ----------------
+        Other Parameters:
+        -----------------
         _ :
             Additional keyword arguments ignored by the function.
 
@@ -418,9 +503,9 @@ if __name__ == "__main__":
     stack = Stack(net)
     # Create the fiber mesh
     mesh = Mesh(stack)
+
     # Instantiate the model
     model = Timoshenko(mesh)
-
     # Permutation of indices
     perm = sp.sparse.csgraph.reverse_cuthill_mckee(model.P, symmetric_mode=True)
     # Visualize the system

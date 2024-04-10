@@ -99,13 +99,12 @@ mat = Mat(100)
 net = Net(mat)
 stack = Stack(net)
 mesh = Mesh(stack)
-model = Timoshenko(mesh)
 
 sol = solve(
-    model,
+    Timoshenko(mesh),
     packing=4,
     solve=lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=True),
-    perm=sp.sparse.csgraph.reverse_cuthill_mckee(model.P, symmetric_mode=True),
+    perm=sp.sparse.csgraph.reverse_cuthill_mckee(Timoshenko(mesh).P, symmetric_mode=True),
 )
 
 msh = vtk_mesh(

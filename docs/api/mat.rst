@@ -2,7 +2,7 @@
 =============
 
 Mat
----
+~~~
 
 .. image:: ../../images/mat.png
     :width: 640

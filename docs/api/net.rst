@@ -2,7 +2,7 @@
 ============
 
 Net
----
+~~~
 
 .. image:: ../../images/net.png
     :width: 640
@@ -11,7 +11,7 @@ Net
     :members:
 
 Example
-~~~~~~~
+-------
 
 .. code-block:: python
 
@@ -61,7 +61,7 @@ Example
 --------------------------------------------------------------------------------
 
 Stack
------
+~~~~~
 
 .. image:: ../../images/stack.png
     :width: 640
@@ -70,7 +70,7 @@ Stack
     :members:
 
 Example
-~~~~~~~
+-------
 
 .. code-block:: python
 

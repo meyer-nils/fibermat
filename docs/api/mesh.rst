@@ -2,7 +2,7 @@
 =======
 
 Mesh
-----
+~~~~
 
 .. image:: ../../images/mesh.png
     :width: 640

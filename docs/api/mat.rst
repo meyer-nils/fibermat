@@ -20,14 +20,14 @@ Example
     # Generate a set of fibers
     mat = Mat(100)
 
+    # Check data
+    Mat.check(mat)  # or `mat.check()`
+    # -> returns True if correct, otherwise it raises an error.
+
     # Get fiber data
     dimensions = mat[[*"lbh"]]  # size: (n x 3)
     positions = mat[[*"xyz"]]  # size: (n x 3)
     orientations = mat[[*"uvw"]]  # size: (n x 3)
-
-    # Check data
-    Mat.check(mat)  # or `mat.check()`
-    # -> returns True if correct, otherwise it raises an error.
 
     # Figure
     fig, ax = plt.subplots(subplot_kw=dict(projection='3d', aspect='equal',

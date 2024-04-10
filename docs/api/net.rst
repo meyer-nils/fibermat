@@ -22,15 +22,15 @@ Example
     # Build the fiber network
     net = Net(mat, periodic=False)
 
+    # Check data
+    Net.check(net)  # or `net.check()`
+    # -> returns True if correct, otherwise it raises an error.
+
     # Get node data
     pairs = net[[*"AB"]].values  # size: (n x 2)
     abscissa = net[["sA", "sB"]].values.reshape(-1, 2, 1)  # size: (n x 2 x 1)
     points = (net[["xA", "yA", "zA", "xB", "yB", "zB"]]
               .values.reshape(-1, 2, 3))  # size: (n x 2 x 3)
-
-    # Check data
-    Net.check(net)  # or `net.check()`
-    # -> returns True if correct, otherwise it raises an error.
 
     # Figure
     fig, ax = plt.subplots(subplot_kw=dict(projection='3d', aspect='equal',
@@ -83,6 +83,10 @@ Example
     # Stack fibers
     stack = Stack(net)
 
+    # Check data
+    Stack.check(stack)  # or `stack.check()`
+    # -> returns True if correct, otherwise it raises an error.
+
     # Get the linear system
     C, mg, H, h = Stack.constraint(stack)
     linsol = Stack.solve(stack)
@@ -90,10 +94,6 @@ Example
     f = linsol.ineqlin.marginals
     # Resulting force
     load = 0.5 * f @ np.abs(C) + 0.5 * f @ C
-
-    # Check data
-    Stack.check(stack)  # or `stack.check()`
-    # -> returns True if correct, otherwise it raises an error.
 
     # Normalize by fiber weight
     load /= np.pi / 4 * mat[[*"lbh"]].prod(axis=1).mean()

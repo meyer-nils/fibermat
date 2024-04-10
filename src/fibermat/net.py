@@ -818,6 +818,10 @@ if __name__ == "__main__":
     # Stack fibers
     stack = Stack(net)
 
+    # Check data
+    Stack.check(stack)  # or `stack.check()`
+    # -> returns True if correct, otherwise it raises an error.
+
     # Get the linear system
     C, mg, H, h = Stack.constraint(stack)
     linsol = Stack.solve(stack)
@@ -825,10 +829,6 @@ if __name__ == "__main__":
     f = linsol.ineqlin.marginals
     # Resulting force
     load = 0.5 * f @ np.abs(C) + 0.5 * f @ C
-
-    # Check data
-    Stack.check(stack)  # or `stack.check()`
-    # -> returns True if correct, otherwise it raises an error.
 
     # Normalize by fiber weight
     load /= np.pi / 4 * mat[[*"lbh"]].prod(axis=1).mean()

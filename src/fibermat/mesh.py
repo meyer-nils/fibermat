@@ -336,6 +336,8 @@ class Mesh(pd.DataFrame):
         # Return True if the test is correct
         return True
 
+    # ~~~ Private methods ~~~ #
+
     def _is(self):
         if self is None:
             return False

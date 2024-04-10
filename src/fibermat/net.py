@@ -385,6 +385,8 @@ class Net(pd.DataFrame):
         # Return True if the test is correct
         return True
 
+    # ~~~ Private methods ~~~ #
+
     def _is(self):
         if self is None:
             return False
@@ -678,6 +680,8 @@ class Stack(Net):
 
         # Return True if the test is correct
         return Net.check(stack)
+
+    # ~~~ Private methods ~~~ #
 
     def _is(self):
         if self is None:

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import numpy
+
 import numpy as np
 import scipy as sp
 from scipy.interpolate import interp1d
 
 from fibermat import *
-from fibermat import Mat, Mesh
+from fibermat import Mesh
 
 
 ################################################################################
@@ -15,57 +15,66 @@ from fibermat import Mat, Mesh
 
 def displacement(u: np.ndarray):
     """ Return nodal displacements."""
-    return u[...]
+    return u[..., ::2]
 
 
 def rotation(u: np.ndarray):
     """ Return nodal rotations."""
-    return np.zeros_like(u)
+    return u[..., 1::2]
 
 
 def force(F: np.ndarray):
     """ Return nodal forces."""
-    return F[...]
+    return F[..., ::2]
 
 
 def torque(F: np.ndarray):
     """ Return nodal torques."""
-    return np.zeros_like(F)
+    return F[..., 1::2]
 
 
 ################################################################################
 # Mechanical model
 ################################################################################
 
-def stiffness(mesh, **_):
+def stiffness(mesh, lmin=0.01, lmax=None, coupling=0.99, **_):
     r"""
     Assemble the quadratic system to be minimized.
 
-    The mechanical model is built using a **linear shear law**:
+    The mechanical model is built using a **Timoshenko beam law** [1]_:
 
     .. MATH::
-        \mathbb{K}_e = \frac{Gbh}{l_e} \cdot \frac{\pi}{4}
+        \mathbb{K}_e = \frac{Gbh}{l_e} \cdot \frac{\pi / 4}{1 + \frac{G}{E} \left( \frac{l_e}{h} \right)^2}
             \left[\begin{matrix}
-                1  &  -1  \\
-               -1  &   1  \\
+                1  &  l_e / 2  &  -1  &  l_e / 2  \\
+                l_e / 2  &  {l_e}^2 / 3 + \frac{E}{G} h^2  &  -l_e / 2  &  {l_e}^2 / 6 - \frac{E}{G} h^2  \\
+               -1  &  -l_e / 2  &  1  &  -l_e / 2  \\
+                l_e / 2  &  {l_e}^2 / 6 - \frac{E}{G} h^2  &  -l_e / 2  &  {l_e}^2 / 3 + \frac{E}{G} h^2  \\
             \end{matrix}\right]
             \ , \quad \mathbf{F}_e =
             \left(\begin{matrix}
+                0 \\
+                0 \\
                 0 \\
                 0 \\
             \end{matrix}\right)
 
     where:
         - 𝑙ₑ is the length of the beam element.
+        - 𝐸 is the tensile modulus.
         - 𝐺 is the shear modulus.
         - 𝑏 and h are the width and thickness of the fiber.
 
-    The displacement vector :math:`\mathbf{u} = (\dots, u_i, \dots)`
-    (with 𝑢ᵢ being the vertical displacement of the i-th node)
+    The displacement vector :math:`\mathbf{u} = (\dots, u_i, \theta_i, \dots)`
+    (with 𝑢ᵢ being the vertical displacement and θᵢ the rotation of the cross-section of the i-th node)
     satisfies *mechanical equilibrium*:
 
     .. MATH::
         \mathbb{K} \, \mathbf{u} = \mathbf{F}
+
+    .. RUBRIC:: Footnotes
+
+    .. [1] `Timoshenko–Ehrenfest beam theory, Wikipedia <https://en.wikipedia.org/wiki/Timoshenko%E2%80%93Ehrenfest_beam_theory>`_.
 
     Parameters
     ----------
@@ -88,17 +97,49 @@ def stiffness(mesh, **_):
 
     Other Parameters
     ----------------
+    lmin : float, optional
+        Lower bound used to rescale beam lengths (mm). Default is 0.01 mm.
+    lmax : float, optional
+        Upper bound used to rescale beam lengths (mm).
+    coupling : float, optional
+        Coupling numerical constant between 0 and 1. Default is 0.99.
     _ :
         Additional keyword arguments ignored by the function.
 
     :Use:
 
-        >>> mat = Mat(1, length=1, width=1, thickness=1, shear=1)
+        >>> # Linear model (Ψ² ≫ 1)
+        >>> mat = Mat(1, length=1, width=1, thickness=1, shear=1, tensile=np.inf)
         >>> net = Net(mat)
         >>> mesh = Mesh(net)
-        >>> print(4 / np.pi * stiffness(mesh)[0].todense())
-        [[ 1. -1.]
-         [-1.  1.]]
+        >>> # print("Linear (Ψ² ≫ 1) =")
+        >>> print(4 / np.pi * stiffness(mesh, coupling=1)[0].todense())
+        [[ 1.   0.5 -1.   0.5]
+         [ 0.5  inf -0.5 -inf]
+         [-1.  -0.5  1.  -0.5]
+         [ 0.5 -inf -0.5  inf]]
+
+        >>> # Timoshenko model (Ψ² = 1)
+        >>> mat = Mat(1, length=1, width=1, thickness=1, shear=2, tensile=2)
+        >>> net = Net(mat)
+        >>> mesh = Mesh(net)
+        >>> # print("Timoshenko (Ψ² = 1) = 1 / 2 *")
+        >>> print(4 / np.pi * stiffness(mesh, coupling=1)[0].todense())
+        [[ 1.          0.5        -1.          0.5       ]
+         [ 0.5         1.33333333 -0.5        -0.83333333]
+         [-1.         -0.5         1.         -0.5       ]
+         [ 0.5        -0.83333333 -0.5         1.33333333]]
+
+        >>> # Euler model (Ψ² ≪ 1)
+        >>> mat = Mat(1, length=1, width=1, thickness=1, shear=1e12, tensile=12)
+        >>> net = Net(mat)
+        >>> mesh = Mesh(net)
+        >>> # print("Euler (Ψ² ≪ 1) = 1 / 12 *")
+        >>> print(4 / np.pi * stiffness(mesh, coupling=1)[0].todense())
+        [[ 12.   6. -12.   6.]
+         [  6.   4.  -6.   2.]
+         [-12.  -6.  12.  -6.]
+         [  6.   2.  -6.   4.]]
 
     """
     # Optional
@@ -117,29 +158,47 @@ def stiffness(mesh, **_):
     mat = mesh.flags.mat
     fiber = mat.loc[fiber]
     l = mesh.s.loc[j].values - mesh.s.loc[i].values
+    if lmin is None:
+        lmin = np.min(l)
+    if lmax is None:
+        lmax = np.max(l)
+    l = interp1d([min(np.min(l), lmin), max(np.max(l), lmax)], [lmin, lmax])(l)
 
     # Timoshenko number : Ψ² = E / G * (h / l) ^ 2
     k0 = np.pi / 4 * fiber[[*"Gbh"]].prod(axis=1).values / l
-    i *= 1
-    j *= 1
+    k0 /= (1 + (fiber.G / fiber.E) * (l / fiber.h) ** 2)
+    k1 = k0 * l / 2
+    k1 *= coupling  # Numerical regularization
+    k2 = k0 * l ** 2 / 3
+    k2 += k0 * (fiber.E / fiber.G) * fiber.h ** 2
+    k3 = k0 * l ** 2 / 2
+    k4 = k2 - k3
+    i *= 2
+    j *= 2
 
     # Create stiffness data
     row = np.array([
-        i, i,
-        j, j,
+        i + 0, i + 0, i + 0, i + 0,
+        i + 1, i + 1, i + 1, i + 1,
+        j + 0, j + 0, j + 0, j + 0,
+        j + 1, j + 1, j + 1, j + 1,
     ]).ravel()
     col = np.array([
-        i, j,
-        i, j,
+        i + 0, i + 1, j + 0, j + 1,
+        i + 0, i + 1, j + 0, j + 1,
+        i + 0, i + 1, j + 0, j + 1,
+        i + 0, i + 1, j + 0, j + 1,
     ]).ravel()
     data = np.array([
-         k0, -k0,
-        -k0,  k0,
+         k0,  k1, -k0,  k1,
+         k1,  k2, -k1, -k4,
+        -k0, -k1,  k0, -k1,
+         k1, -k4, -k1,  k2
     ]).ravel()
 
     # Initialize 𝕂 matrix
     K = sp.sparse.coo_matrix((data, (row, col)),
-                             shape=(1 * len(mesh), 1 * len(mesh)))
+                             shape=(2 * len(mesh), 2 * len(mesh)))
 
     # Initialize 𝒖 and 𝑭 vectors
     u = np.zeros(K.shape[0])
@@ -154,14 +213,14 @@ def constraint(mesh, **_):
     r"""
     Assemble the linear constraints.
 
-    The contact model is built using **normal non-penetration conditions** [1]_:
+    The contact model is built using **normal non-penetration conditions** [2]_:
 
     .. MATH::
         \mathbb{C}_e =
-            \left[\begin{array}{rr}
-                 -1  &  0  \\
-                  1  & -1  \\
-                  0  &  1  \\
+            \left[\begin{array}{rrrr}
+                 -1  &  0  &  0  &  0  \\
+                  1  &  0  & -1  &  0  \\
+                  0  &  0  &  1  &  0  \\
             \end{array}\right]
             \ , \quad \mathbf{H}_e =
             \left(\begin{matrix}
@@ -184,7 +243,7 @@ def constraint(mesh, **_):
 
     .. RUBRIC:: Footnotes
 
-    .. [1] `Karush–Kuhn–Tucker conditions, Wikipedia <https://en.wikipedia.org/wiki/Karush%E2%80%93Kuhn%E2%80%93Tucker_conditions>`_.
+    .. [2] `Karush–Kuhn–Tucker conditions, Wikipedia <https://en.wikipedia.org/wiki/Karush%E2%80%93Kuhn%E2%80%93Tucker_conditions>`_.
 
     Parameters
     ----------
@@ -233,8 +292,8 @@ def constraint(mesh, **_):
     hi = mesh.h.loc[i].values
     hj = mesh.h.loc[j].values
     Z = (mesh.z.values + 0.5 * mesh.h.values).max()  # : upper boundary position
-    i *= 1
-    j *= 1
+    i *= 2
+    j *= 2
     k *= 3
 
     # Create constraint data
@@ -244,7 +303,7 @@ def constraint(mesh, **_):
 
     # Initialize ℂ matrix
     C = sp.sparse.coo_matrix((data, (row, col)),
-                             shape=(3 * len(mesh[mask]), 1 * len(mesh)))
+                             shape=(3 * len(mesh[mask]), 2 * len(mesh)))
 
     # Initialize 𝒇 and 𝑯 vectors
     f = np.zeros(C.shape[0])

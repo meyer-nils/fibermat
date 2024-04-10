@@ -8,12 +8,14 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 from fibermat import *
+from fibermat import Mesh
+from fibermat.model.timoshenko import Timoshenko
 from fibermat.utils.interpolation import Interpolate
 
 
-def solve(mesh, stiffness=None, constraint=None, packing=1., itermax=1000,
+def solve(model, packing=1., itermax=1000,
           solve=sp.sparse.linalg.spsolve, perm=None, tol=1e-6,
-          errtol=1e-6, interp_size=None, verbose=True, **kwargs):
+          errtol=1e-6, interp_size=None, verbose=True, **_):
     r"""
     An iterative mechanical solver for **fiber packing problems**.
 
@@ -58,30 +60,8 @@ def solve(mesh, stiffness=None, constraint=None, packing=1., itermax=1000,
 
     Parameters
     ----------
-    mesh : pandas.DataFrame, optional
-        Fiber mesh represented by a :class:`~.Mesh` object.
-    stiffness : tuple, optional
-        K : sparse matrix
-            Stiffness matrix (symmetric positive-semi definite).
-        u : numpy.ndarray
-            Displacement vector.
-        F : numpy.ndarray
-            Load vector.
-        du : numpy.ndarray
-            Incremental displacement vector.
-        dF : numpy.ndarray
-            Incremental load vector.
-    constraint : tuple, optional
-        C : sparse matrix
-            Constraint matrix.
-        f : numpy.ndarray
-            Force vector.
-        H : numpy.ndarray
-            Upper-bound vector.
-        df : numpy.ndarray
-            Incremental force vector.
-        dH : numpy.ndarray
-            Incremental upper-bound vector.
+    model : Model
+        Mechanical model object. If None, :class:`~.Timoshenko` model is used.
     packing : float, optional
         Targeted value of packing. Must be greater than 1. Default is 1.0.
     itermax : int, optional
@@ -89,27 +69,9 @@ def solve(mesh, stiffness=None, constraint=None, packing=1., itermax=1000,
 
     Returns
     -------
-    tuple
-        K : sparse matrix
-            Stiffness matrix (symmetric positive-semi definite).
-        C : sparse matrix
-            Constraint matrix.
-        u : Interpolate
-            Displacement vector.
-        f : Interpolate
-            Force vector.
-        F : Interpolate
-            Load vector.
-        H : Interpolate
-            Upper-bound vector.
-        Z : Interpolate
-            Upper-boundary position.
-        rlambda : Interpolate
-            Compaction stretch factor.
-        mask : Interpolate
-            Active rows and columns in the system of inequations.
-        err : Interpolate
-            Numerical error of the linear solver.
+    model : Model
+        Solved model with interpolated solution.
+        TODO: describe interpolation attributes
 
     .. SEEALSO::
         Simulation results are given as functions of a pseudo-time parameter (between 0 and 1) using :class:`~.interpolation.Interpolate` objects.
@@ -130,8 +92,8 @@ def solve(mesh, stiffness=None, constraint=None, packing=1., itermax=1000,
         Size of array used for interpolation. Default is None.
     verbose : bool, optional
         If True, a progress bar is displayed. Default is True.
-    kwargs :
-        Additional keyword arguments passed to matrix constructors if `stiffness` or `constraint` are None.
+    _ :
+        Additional keyword arguments ignored by the function.
 
     :Use:
 
@@ -141,44 +103,23 @@ def solve(mesh, stiffness=None, constraint=None, packing=1., itermax=1000,
         >>> net = Net(mat)
         >>> # Create the fiber mesh
         >>> mesh = Mesh(net)
+        >>> # Instantiate the model
+        >>> model = Timoshenko(mesh)
         >>> # Solve the mechanical packing problem
-        >>> K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
+        >>> sol = solve(model, packing=4)
 
     """
-    # Optional
-    if mesh is None:
-        mesh = Mesh()
-
     # Assemble the quadratic programming system
-    if stiffness is None:
-        K, u, F, du, dF = fibermat.model.timoshenko.stiffness(mesh, **kwargs)
-    else:
-        K, u, F, du, dF = stiffness
-    if constraint is None:
-        C, f, H, df, dH = fibermat.model.timoshenko.constraint(mesh, **kwargs)
-    else:
-        C, f, H, df, dH = constraint
-    P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
-    x = np.r_[u, f]
-    q = np.r_[F, H]
-    dx = np.r_[du, df]
-    dq = np.r_[dF, dH]
+    mesh, P, x, q, dx, dq = model()
 
     if perm is None:
         perm = np.arange(P.shape[0])
 
-    u, f = np.split(x, [K.shape[0]])  # Memory-shared
-    F, H = np.split(q, [K.shape[0]])  # Memory-shared
-    # du, df = np.split(dx, [K.shape[0]])  # Memory-shared
-    # dF, dH = np.split(dq, [K.shape[0]])  # Memory-shared
-
-    u_ = [u.copy()]
-    f_ = [f.copy()]
-    F_ = [F.copy()]
-    H_ = [H.copy()]
+    x_ = [x.copy()]
+    q_ = [q.copy()]
+    # TODO: put inside the model
     Z_ = [(mesh.z.values + 0.5 * mesh.h.values).max()]
     rlambda_ = [1.0]
-    mask_ = [(np.real(q - P @ x) <= tol)]
     err_ = [0]
 
     # Incremental solver
@@ -188,12 +129,10 @@ def solve(mesh, stiffness=None, constraint=None, packing=1., itermax=1000,
         while (i < pbar.total) and (rlambda_[-1] < packing):
             # Solve step
             dx *= 0
-            # mask = [True] * K.shape[0] + [*(C @ u >= H - tol)]
             mask = (np.real(q - P @ x) <= tol)
             mask &= np.array(np.sum(np.abs(np.real(P)), axis=0) > 0).ravel()
             # Solve linear problem
             try:
-                # dx[mask] += np.real(solve(P[np.ix_(mask, mask)], dq[mask]))
                 dx[perm[mask[perm]]] = np.real(
                     solve(
                         P[np.ix_(perm[mask[perm]], perm[mask[perm]])],
@@ -227,13 +166,10 @@ def solve(mesh, stiffness=None, constraint=None, packing=1., itermax=1000,
             x += dx * dU
             q += dq * dU
             # Store results
-            u_ += [u.copy()]
-            f_ += [f.copy()]
-            F_ += [F.copy()]
-            H_ += [H.copy()]
+            x_ += [x.copy()]
+            q_ += [q.copy()]
             Z_ += [Z_[-1] + dU]
             rlambda_ += [Z_[0] / Z_[-1]]
-            mask_ += [mask.copy()]
             err_ += [err.copy()]
 
             # Update
@@ -241,21 +177,20 @@ def solve(mesh, stiffness=None, constraint=None, packing=1., itermax=1000,
             pbar.set_description("Packing: {:.2}".format(rlambda_[-1]))
             pbar.update()
 
+    # Solved model
+    sol = model.copy()
+
     # Interpolate results
     with warnings.catch_warnings():
         # Ignore warning messages due to infinite values in 𝐇
         warnings.filterwarnings('ignore')
-        u = Interpolate(u_, size=interp_size)
-        f = Interpolate(f_, size=interp_size)
-        F = Interpolate(F_, size=interp_size)
-        H = Interpolate(H_, size=interp_size)
-        Z = Interpolate(Z_, size=interp_size)
-        rlambda = Interpolate(rlambda_)
-        mask = Interpolate(mask_, kind='previous')
-        err = Interpolate(err_, kind='previous')
+        sol.set(x_, q_, size=interp_size)
+        sol.Z = Interpolate(Z_, size=interp_size)
+        sol.rlambda = Interpolate(rlambda_)
+        sol.err = Interpolate(err_, kind='previous')
 
     # Return interpolated results
-    return K, C, u, f, F, H, Z, rlambda, mask, err
+    return sol
 
 
 def plot_system(stiffness, constraint,
@@ -377,10 +312,10 @@ if __name__ == "__main__":
     mesh = Mesh(stack)
 
     # Solve the mechanical packing problem
-    K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
+    sol = solve(Timoshenko(mesh), packing=4)
 
     # Deform the mesh
-    mesh.z += displacement(u(1))
+    mesh.z += sol.displacement(1)
 
     # Figure
     fig, ax = plt.subplots(subplot_kw=dict(projection='3d', aspect='equal',

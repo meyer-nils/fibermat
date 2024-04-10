@@ -198,7 +198,7 @@ See the tutorial in `jupyter-notebook.ipynb`.
 from fibermat import *
 
 # Generate a set of fibers
-mat = Mat(100, length=25, width=2, thickness=0.5, shear=1, tensile=2500)
+mat = Mat(100, length=25., width=2., thickness=0.5, size=50., shear=1., tensile=2500.)
 # Build the fiber network
 net = Net(mat, periodic=True)
 # Stack fibers
@@ -207,15 +207,15 @@ stack = Stack(net, threshold=10)
 mesh = Mesh(stack)
 
 # Solve the mechanical packing problem
-K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
+sol = solve(Timoshenko(mesh), packing=4)
 
 # Export as VTK
 msh = vtk_mesh(
-   mesh,
-   displacement(u(1)),
-   rotation(u(1)),
-   force(f(1) @ C),
-   torque(f(1) @ C),
+    mesh,
+    sol.displacement(1),
+    sol.rotation(1),
+    sol.force(1),
+    sol.torque(1),
 )
 msh.plot(scalars="force", cmap=plt.cm.twilight_shifted)
 msh.save("outputs/msh.vtk")

@@ -25,10 +25,10 @@ def test_solver():
     mesh = Mesh(net)
 
     # Solve the mechanical packing problem
-    K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
+    sol = solve(Timoshenko(mesh), packing=4)
 
     assert np.allclose(
-        f(1) @ C,
+        sol.f(1) @ sol.C,
         np.array([
              0., 0.,  # Fiber 0
              0., 0.,  # Fiber 0
@@ -64,10 +64,10 @@ if __name__ == '__main__':
     mesh = Mesh(net)
 
     # Solve the mechanical packing problem
-    K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
+    sol = solve(Timoshenko(mesh), packing=4)
 
     # Deform the mesh
-    mesh.z += u(1)[::2]
+    mesh.z += sol.displacement(1)
 
     # Figure
     fig, ax = plt.subplots(subplot_kw=dict(projection='3d', aspect='equal',

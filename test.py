@@ -1,7 +1,7 @@
 from fibermat import *
 
-mesh = Mesh(Stack(Net(Mat(10))))
+mesh = Mesh(Stack(Net(Mat(100))))
 
-K, C, u, f, F, H, Z, rlambda, mask, err = solve(mesh, packing=4)
+sol = solve(Timoshenko(mesh), packing=4)
 
-vtk_mesh(mesh, displacement(u(1))).plot()
+vtk_mesh(mesh, sol.displacement(1)).plot()

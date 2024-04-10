@@ -73,39 +73,34 @@ if __name__ == "__main__":
     net = Net(mat, periodic=True)
     stack = Stack(net, threshold=10)
     mesh = Mesh(stack)
+    model = Timoshenko(mesh)
 
-    # Assemble the quadratic programming system
-    K, u, F, du, dF = stiffness(mesh)
-    C, f, H, df, dH = constraint(mesh)
-    P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
     # Permutation of indices
-    perm = sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True)
+    perm = sp.sparse.csgraph.reverse_cuthill_mckee(model.P, symmetric_mode=True)
     # Visualize the system
     _, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
-    plot_system((K, u, F, du, dF), (C, f, H, df, dH), perm=None, ax=ax[0])
-    plot_system((K, u, F, du, dF), (C, f, H, df, dH), perm=perm, ax=ax[1])
+    plot_system(model.stiffness(), model.constraint(), perm=None, ax=ax[0])
+    plot_system(model.stiffness(), model.constraint(), perm=perm, ax=ax[1])
     plt.show()
 
-    K, C, u, f, F, H, Z, rlambda, mask, err = solve(
-        mesh,
-        stiffness(mesh, lmin=0.01, coupling=0.99),
-        constraint(mesh),
+    sol = solve(
+        model,
         packing=4,
         solve=lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=False),
-        perm=sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True),
+        perm=sp.sparse.csgraph.reverse_cuthill_mckee(model.P, symmetric_mode=True),
     )
 
     # Visualize system evolution
     _, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
-    plot_system((K, u(0), F(0), du, dF), (C, f(0), H(0), df, dH), ax=ax[0])
-    plot_system((K, u(1), F(1), du, dF), (C, f(1), H(1), df, dH), ax=ax[1])
+    plot_system(sol.stiffness(0), sol.constraint(0), ax=ax[0])
+    plot_system(sol.stiffness(1), sol.constraint(1), ax=ax[1])
     plt.show()
 
     msh = vtk_mesh(
         mesh,
-        displacement(u(1)),
-        rotation(u(1)),
-        force(f(1) @ C),
-        torque(f(1) @ C),
+        sol.displacement(1),
+        sol.rotation(1),
+        sol.force(1),
+        sol.torque(1),
     )
     msh.plot(scalars="force", cmap=plt.cm.twilight_shifted)

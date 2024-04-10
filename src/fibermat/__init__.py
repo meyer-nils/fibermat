@@ -72,12 +72,17 @@ Structure
     └── plot_system
 + model
     └── timoshenko.py
-        ├── displacement
-        ├── rotation
-        ├── force
-        ├── torque
-        ├── stiffness
-        └── constraint
+        └── Timoshenko
+            ├── u
+            ├── F
+            ├── f
+            ├── H
+            ├── displacement
+            ├── rotation
+            ├── force
+            ├── torque
+            ├── stiffness
+            └── constraint
 + utils
     └── interpolation.py
         └──  Interpolate
@@ -94,24 +99,21 @@ mat = Mat(100)
 net = Net(mat)
 stack = Stack(net)
 mesh = Mesh(stack)
+model = Timoshenko(mesh)
 
-K, u, F, du, dF = stiffness(mesh)
-C, f, H, df, dH = constraint(mesh)
-P = sp.sparse.bmat([[K, C.T], [C, None]], format='csc')
-
-K, C, u, f, F, H, Z, rlambda, mask, err = solve(
-    mesh,
+sol = solve(
+    model,
     packing=4,
     solve=lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=True),
-    perm=sp.sparse.csgraph.reverse_cuthill_mckee(P, symmetric_mode=True),
+    perm=sp.sparse.csgraph.reverse_cuthill_mckee(model.P, symmetric_mode=True),
 )
 
 msh = vtk_mesh(
     mesh,
-    displacement(u(1)),
-    rotation(u(1)),
-    force(f(1) @ C),
-    torque(f(1) @ C),
+    sol.displacement(1),
+    sol.rotation(1),
+    sol.force(1),
+    sol.torque(1),
 )
 msh.plot(scalars="force", cmap=plt.cm.twilight_shifted)
 

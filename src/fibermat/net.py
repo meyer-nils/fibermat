@@ -152,6 +152,8 @@ class Net(pd.DataFrame):
         ----------
         mat : pandas.DataFrame, optional
             Set of fibers represented by a :class:`~.Mat` object.
+        periodic : bool, optional
+            If True, fibers are duplicated for periodicity. Default is True.
 
         Returns
         -------
@@ -160,8 +162,6 @@ class Net(pd.DataFrame):
 
         Other Parameters
         ----------------
-        periodic : bool, optional
-            If True, fibers are duplicated for periodicity. Default is True.
         pairs : numpy.ndarray, optional
             Pairs of fiber indices used to find nearest points. Size: (m x 2).
         _ :

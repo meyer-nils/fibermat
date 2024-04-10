@@ -14,7 +14,7 @@ from fibermat import Mat, Mesh
 
 def vtk_fiber(length=25., width=1., thickness=1., x=0., y=0., z=0.,
               u=1., v=0., w=0., shear=1., tensile=np.inf, index=None,
-              r_resolution=1, theta_resolution=8, z_resolution=20, **kwargs):
+              r_resolution=1, theta_resolution=8, z_resolution=20, **_):
     """
     Export a fiber as VTK mesh using `pyvista.CylinderStructured
     <https://docs.pyvista.org/version/stable/api/utilities/_autosummary/pyvista.CylinderStructured.html>`_.
@@ -59,7 +59,7 @@ def vtk_fiber(length=25., width=1., thickness=1., x=0., y=0., z=0.,
         Number of points on the circular face of the fiber. Default is 8.
     z_resolution : int, optional
         Number of points along the length of the fiber. Default is 20.
-    kwargs :
+    _ :
         Additional keyword arguments ignored by the function.
 
     .. NOTE::

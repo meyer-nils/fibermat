@@ -13,7 +13,8 @@ from fibermat import Mat, Net
 
 class Mesh(pd.DataFrame):
     """
-    A class inherited from pandas.DataFrame_ to **represent a mesh structure** for a set of discontinuous fibers.
+    A class inherited from pandas.DataFrame_ **to represent a mesh structure**
+    for a set of discontinuous fibers.
 
     It defines:
 
@@ -27,7 +28,7 @@ class Mesh(pd.DataFrame):
 
     Other Parameters
     ----------------
-    kwargs :
+    _ :
         Additional keyword arguments ignored by the function.
 
     .. NOTE::
@@ -135,7 +136,7 @@ class Mesh(pd.DataFrame):
     # ~~~ Constructor ~~~ #
 
     @staticmethod
-    def init(net=None, **kwargs):
+    def init(net=None, **_):
         """
         Create a discontinuous fiber mesh.
 
@@ -151,7 +152,7 @@ class Mesh(pd.DataFrame):
 
         Other Parameters
         ----------------
-        kwargs :
+        _ :
             Additional keyword arguments ignored by the function.
 
         """
@@ -341,7 +342,7 @@ class Mesh(pd.DataFrame):
         try:
             __class__.check(self)
             return True
-        except:
+        except (KeyError, AttributeError, IndexError, TypeError, ValueError):
             return False
 
 

@@ -169,8 +169,8 @@ def solve(mesh, stiffness=None, constraint=None, packing=1., itermax=1000,
 
     u, f = np.split(x, [K.shape[0]])  # Memory-shared
     F, H = np.split(q, [K.shape[0]])  # Memory-shared
-    du, df = np.split(dx, [K.shape[0]])  # Memory-shared
-    dF, dH = np.split(dq, [K.shape[0]])  # Memory-shared
+    # du, df = np.split(dx, [K.shape[0]])  # Memory-shared
+    # dF, dH = np.split(dq, [K.shape[0]])  # Memory-shared
 
     u_ = [u.copy()]
     f_ = [f.copy()]

@@ -12,7 +12,8 @@ from fibermat import *
 
 class Mat(pd.DataFrame):
     """
-    A class inherited from pandas.DataFrame_ to **describe a fibrous material** made up of a set of random fibers.
+    A class inherited from pandas.DataFrame_ **to describe a fibrous material**
+    made up of a set of random fibers.
 
     It defines:
 
@@ -45,7 +46,7 @@ class Mat(pd.DataFrame):
 
     Other Parameters
     ----------------
-    kwargs :
+    _ :
         Additional keyword arguments ignored by the function.
 
     .. NOTE::
@@ -159,7 +160,7 @@ class Mat(pd.DataFrame):
 
     @staticmethod
     def init(n=0, length=25., width=1., thickness=1., size=50.,
-             theta=np.pi, psi=0., shear=1., tensile=np.inf, seed=0, **kwargs):
+             theta=np.pi, psi=0., shear=1., tensile=np.inf, seed=0, **_):
         """
         Generate a set of random straight fibers.
 
@@ -193,7 +194,7 @@ class Mat(pd.DataFrame):
 
         Other Parameters
         ----------------
-        kwargs :
+        _ :
             Additional keyword arguments ignored by the function.
 
         """
@@ -345,7 +346,7 @@ class Mat(pd.DataFrame):
         try:
             __class__.check(self)
             return True
-        except:
+        except (KeyError, AttributeError, IndexError, TypeError, ValueError):
             return False
 
 

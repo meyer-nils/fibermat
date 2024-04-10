@@ -37,7 +37,7 @@ def torque(F: np.ndarray):
 # Mechanical model
 ################################################################################
 
-def stiffness(mesh, **kwargs):
+def stiffness(mesh, **_):
     r"""
     Assemble the quadratic system to be minimized.
 
@@ -88,7 +88,7 @@ def stiffness(mesh, **kwargs):
 
     Other Parameters
     ----------------
-    kwargs :
+    _ :
         Additional keyword arguments ignored by the function.
 
     :Use:
@@ -150,7 +150,7 @@ def stiffness(mesh, **kwargs):
     return K, u, F, du, dF
 
 
-def constraint(mesh, **kwargs):
+def constraint(mesh, **_):
     r"""
     Assemble the linear constraints.
 
@@ -207,7 +207,7 @@ def constraint(mesh, **kwargs):
 
     Other Parameters
     ----------------
-    kwargs :
+    _ :
         Additional keyword arguments ignored by the function.
 
     """

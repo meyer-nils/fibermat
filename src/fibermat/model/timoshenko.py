@@ -37,7 +37,7 @@ def torque(F: np.ndarray):
 # Mechanical model
 ################################################################################
 
-def stiffness(mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
+def stiffness(mesh, lmin=0.01, lmax=None, coupling=0.99, **_):
     r"""
     Assemble the quadratic system to be minimized.
 
@@ -103,7 +103,7 @@ def stiffness(mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
         Upper bound used to rescale beam lengths (mm).
     coupling : float, optional
         Coupling numerical constant between 0 and 1. Default is 0.99.
-    kwargs :
+    _ :
         Additional keyword arguments ignored by the function.
 
     :Use:
@@ -209,7 +209,7 @@ def stiffness(mesh, lmin=0.01, lmax=None, coupling=0.99, **kwargs):
     return K, u, F, du, dF
 
 
-def constraint(mesh, **kwargs):
+def constraint(mesh, **_):
     r"""
     Assemble the linear constraints.
 
@@ -266,7 +266,7 @@ def constraint(mesh, **kwargs):
 
     Other Parameters
     ----------------
-    kwargs :
+    _ :
         Additional keyword arguments ignored by the function.
 
     """

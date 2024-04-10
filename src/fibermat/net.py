@@ -15,7 +15,7 @@ from fibermat import Mat
 
 class Net(pd.DataFrame):
     r"""
-    A class inherited from pandas.DataFrame_ to **build a fiber network**.
+    A class inherited from pandas.DataFrame_ **to build a fiber network**.
 
     It describes nodes and connections between fibers within a :class:`~.Mat` object:
 
@@ -33,7 +33,7 @@ class Net(pd.DataFrame):
         If True, fibers are duplicated for periodicity. Default is True.
     pairs : numpy.ndarray, optional
         Pairs of fiber indices used to find nearest points. Size: (m x 2).
-    kwargs :
+    _ :
         Additional keyword arguments ignored by the function.
 
     .. NOTE::
@@ -144,7 +144,7 @@ class Net(pd.DataFrame):
     # ~~~ Constructor ~~~ #
 
     @staticmethod
-    def init(mat=None, periodic=True, pairs=None, **kwargs):
+    def init(mat=None, periodic=True, pairs=None, **_):
         """
         Build a fiber network.
 
@@ -164,7 +164,7 @@ class Net(pd.DataFrame):
             If True, fibers are duplicated for periodicity. Default is True.
         pairs : numpy.ndarray, optional
             Pairs of fiber indices used to find nearest points. Size: (m x 2).
-        kwargs :
+        _ :
             Additional keyword arguments ignored by the function.
 
         """
@@ -391,13 +391,13 @@ class Net(pd.DataFrame):
         try:
             __class__.check(self)
             return True
-        except:
+        except (KeyError, AttributeError, IndexError, TypeError, ValueError):
             return False
 
 
 class Stack(Net):
     """
-    A class inherited from :class:`Net` to **stack a set of fibers**.
+    A class inherited from :class:`Net` **to stack a set of fibers**.
 
     It solves the *linear programming system*:
 
@@ -415,7 +415,7 @@ class Stack(Net):
         - ℂ is the matrix of inequality constraints that positions must satisfy to prevent the fibers from crossing each other.
         - -𝐇 corresponds to the minimum distances between the pairs of fibers.
 
-    *Non-penetration conditions* between two fibers give the expressions of rows of ℂ and 𝐇:
+    *Non-penetration conditions* between two fibers give the expressions for the rows of ℂ and 𝐇:
 
     .. MATH::
         z_B - z_A \geq (h_A + h_B) \, / \, 2
@@ -685,7 +685,7 @@ class Stack(Net):
         try:
             __class__.check(self)
             return True
-        except:
+        except (KeyError, AttributeError, IndexError, TypeError, ValueError):
             return False
 
     @staticmethod
@@ -706,7 +706,7 @@ class Stack(Net):
         Other Parameters
         ----------------
         kwargs :
-            Additional keyword arguments ignored by the function.
+            Additional keyword arguments passed to the solver.
 
         .. SEEALSO::
             The solver is based on scipy.optimize.linprog_.
@@ -727,14 +727,14 @@ class Stack(Net):
             # Linear programming solver
             bounds = np.c_[0.5 * h, np.full(len(h), np.inf)]
             # TODO: pass a solver with options as argument instead
-            linsol = sp.optimize.linprog(f, C, H, bounds=bounds)
+            linsol = sp.optimize.linprog(f, C, H, bounds=bounds, method='highs', **kwargs)
         else:
             linsol = None
 
         return linsol
 
     @staticmethod
-    def constraint(net=None, **kwargs):
+    def constraint(net=None, **_):
         """
         Assemble the linear system:
 
@@ -763,7 +763,7 @@ class Stack(Net):
 
         Other Parameters
         ----------------
-        kwargs :
+        _ :
             Additional keyword arguments ignored by the function.
 
         """

@@ -86,9 +86,9 @@ This code is the result of thesis work that can be found in:
 
 ## Installation
 
-Requirements
-+ `python>=3.8`
-+ `jupyter`
+Requirements:
+
+![Python versions](https://img.shields.io/badge/python-3.8%20|%203.9%20|%203.10%20|%203.11-blue)
 
 ### Install the package with Pip
 

@@ -95,17 +95,23 @@ Example
 -------
 from fibermat import *
 
-mat = Mat(100)
-net = Net(mat)
-stack = Stack(net)
+mat = Mat(100, length=25, width=2., thickness=0.5, size=50., shear=1., tensile=2500.)
+net = Net(mat, periodic=True)
+stack = Stack(net, threshold=10)
 mesh = Mesh(stack)
 
 sol = solve(
     Timoshenko(mesh),
-    packing=4,
-    solve=lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=True),
+    packing=4.,
+    solve=lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=False),
     perm=sp.sparse.csgraph.reverse_cuthill_mckee(Timoshenko(mesh).P, symmetric_mode=True),
 )
+
+# Visualize system evolution
+_, ax = plt.subplots(1, 2, figsize=(2 * 6.4, 4.8))
+plot_system(sol.stiffness(0), sol.constraint(0), ax=ax[0])
+plot_system(sol.stiffness(1), sol.constraint(1), ax=ax[1])
+plt.show()
 
 msh = vtk_mesh(
     mesh,

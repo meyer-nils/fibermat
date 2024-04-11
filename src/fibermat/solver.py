@@ -193,7 +193,7 @@ def solve(model, packing=1., itermax=1000,
 
     # Interpolate results
     with warnings.catch_warnings():
-        # Ignore warning messages due to infinite values in 𝐇
+        # Ignore warning messages
         warnings.filterwarnings('ignore')
         sol.set(x_, q_, size=interp_size)
         sol.Z = Interpolate(Z_, size=interp_size)

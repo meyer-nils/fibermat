@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     from fibermat import *
 
-    mat = Mat(100, length=25, width=2, thickness=0.5, shear=1, tensile=2500)
+    mat = Mat(100, length=25, width=2., thickness=0.5, size=50., shear=1., tensile=2500.)
     net = Net(mat, periodic=True)
     stack = Stack(net, threshold=10)
     mesh = Mesh(stack)
@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     sol = solve(
         Timoshenko(mesh),
-        packing=4,
+        packing=4.,
         solve=lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=False),
         perm=sp.sparse.csgraph.reverse_cuthill_mckee(Timoshenko(mesh).P, symmetric_mode=True),
     )

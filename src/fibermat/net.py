@@ -755,7 +755,7 @@ class Stack(Net):
             mg : numpy.ndarray
                 Force vector.
             H : numpy.ndarray
-                Upper-bound vector.
+                Minimum distance vector.
             h : numpy.ndarray
                 Thickness vector.
 

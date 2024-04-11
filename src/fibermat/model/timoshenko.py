@@ -197,7 +197,7 @@ class Timoshenko:
         r"""
         Assemble the quadratic system to be minimized.
 
-        The mechanical model is built using **Timoshenko's beam theory** [1]_:
+        The mechanical model is built using **Timoshenko beam theory** [1]_:
 
         .. MATH::
             \mathbb{K}_e = \frac{Gbh}{l_e} \cdot \frac{\pi / 4}{1 + \frac{G}{E} \left( \frac{l_e}{h} \right)^2}

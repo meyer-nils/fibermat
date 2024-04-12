@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from fibermat import *
 from fibermat import Mesh
-from fibermat.model.timoshenko import Timoshenko as Model
+from fibermat.model.timoshenko import Timoshenko as Model  # Default model
 from fibermat.utils.interpolation import Interpolate
 
 

@@ -8,6 +8,7 @@ from scipy.interpolate import interp1d
 
 from fibermat import *
 from fibermat import Mesh
+from fibermat.model.timoshenko import Timoshenko
 from fibermat.utils.interpolation import Interpolate
 
 

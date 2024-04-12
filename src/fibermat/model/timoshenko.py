@@ -55,22 +55,6 @@ class Timoshenko:
         Upper-bound vector.
     `dq` :
         Increment vector.
-    :attr:`u` :
-        Generalized displacement vector.
-    :attr:`f` :
-        Internal force vector.
-    :attr:`F` :
-        External force vector.
-    :attr:`H` :
-        Minimum distance vector.
-    :attr:`displacement` :
-        Nodal displacements.
-    :attr:`rotation` :
-        Nodal rotations.
-    :attr:`force` :
-        Nodal forces.
-    :attr:`torque` :
-        Nodal torques.
 
     Methods
     -------
@@ -80,6 +64,22 @@ class Timoshenko:
         Return a copy of the model.
     :meth:`set` :
         Calculate interpolated solution.
+    :meth:`u` :
+        Generalized displacement vector.
+    :meth:`f` :
+        Internal force vector.
+    :meth:`F` :
+        External force vector.
+    :meth:`H` :
+        Minimum distance vector.
+    :meth:`displacement` :
+        Nodal displacements.
+    :meth:`rotation` :
+        Nodal rotations.
+    :meth:`force` :
+        Nodal forces.
+    :meth:`torque` :
+        Nodal torques.
     :meth:`stiffness` :
         Assemble the quadratic system to be minimized.
     :meth:`constraint` :
@@ -300,6 +300,16 @@ class Timoshenko:
              [  6.   2.  -6.   4.]]
 
         """
+        # Optional
+        if t is not None:
+            try:
+                K, _, _, du, dF = self.stiffness()
+                u = self.u(t)
+                F = self.F(t)
+                return K, u, F, du, dF
+            except TypeError:
+                pass
+
         mesh = self.mesh
         assert Mesh.check(mesh)
 
@@ -357,14 +367,8 @@ class Timoshenko:
                                  shape=(2 * len(mesh), 2 * len(mesh)))
 
         # Initialize 𝒖 and 𝑭 vectors
-        try:
-            u = self.u(t)
-        except TypeError:
-            u = np.zeros(K.shape[0])
-        try:
-            F = self.F(t)
-        except TypeError:
-            F = np.zeros(K.shape[0])
+        u = np.zeros(K.shape[0])
+        F = np.zeros(K.shape[0])
         du = np.zeros(K.shape[0])
         dF = np.zeros(K.shape[0])
 
@@ -431,6 +435,16 @@ class Timoshenko:
             Additional keyword arguments ignored by the function.
 
         """
+        # Optional
+        if t is not None:
+            try:
+                C, _, _, df, dH = self.constraint()
+                f = self.f(t)
+                H = self.H(t)
+                return C, f, H, df, dH
+            except TypeError:
+                pass
+
         mesh = self.mesh
         assert Mesh.check(mesh)
 
@@ -464,14 +478,8 @@ class Timoshenko:
                                  shape=(3 * len(mesh[mask]), 2 * len(mesh)))
 
         # Initialize 𝒇 and 𝑯 vectors
-        try:
-            f = self.f(t)
-        except TypeError:
-            f = np.zeros(C.shape[0])
-        try:
-            H = self.H(t)
-        except TypeError:
-            H = np.zeros(C.shape[0])
+        f = np.zeros(C.shape[0])
+        H = np.zeros(C.shape[0])
         df = np.zeros(C.shape[0])
         dH = np.zeros(C.shape[0])
         # (X₁ + u₁) ≥ ½h₁ ⟺ -u₁ ≤ X₁ - ½h₁

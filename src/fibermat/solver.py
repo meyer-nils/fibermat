@@ -283,8 +283,7 @@ def plot_system(stiffness, constraint,
     ax.spy((D2 @ P + P @ D2)[np.ix_(perm, perm)], ms=3, color='tab:blue', alpha=0.25, label="inner")
     ax.spy((D1 @ P + P @ D1)[np.ix_(perm, perm)], ms=3, color='tab:green', alpha=0.5, label="lower")
     ax.spy((D3 @ P + P @ D3)[np.ix_(perm, perm)], ms=3, color='tab:red', alpha=0.5, label="upper")
-    ax.spy((D4 @ P + P @ D4)[np.ix_(perm, perm)], ms=1, color='gray', zorder=-1, alpha=0.1,
-           label="inactive")
+    ax.spy((D4 @ P + P @ D4)[np.ix_(perm, perm)], ms=1, color='gray', zorder=-1, alpha=0.1, label="inactive")
     ax.legend()
 
     mask = (np.real(q - P @ x) <= tol)

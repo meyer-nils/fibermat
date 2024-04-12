@@ -125,9 +125,6 @@ class Mat(pd.DataFrame):
         ----------
         args :
             Additional positional arguments passed to the constructor.
-
-        Other Parameters
-        ----------------
         kwargs :
             Additional keyword arguments passed to the constructor.
 
@@ -184,11 +181,6 @@ class Mat(pd.DataFrame):
         -------
         mat : pandas.DataFrame
             Initialized :class:`Mat` object.
-
-        Other Parameters
-        ----------------
-        _ :
-            Additional keyword arguments ignored by the function.
 
         """
         # Random generation

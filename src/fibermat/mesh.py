@@ -143,11 +143,6 @@ class Mesh(pd.DataFrame):
         mesh : pandas.DataFrame
             Initialized :class:`Mesh` object.
 
-        Other Parameters
-        ----------------
-        _ :
-            Additional keyword arguments ignored by the function.
-
         """
         # Optional
         if net is None:

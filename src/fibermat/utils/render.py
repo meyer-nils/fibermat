@@ -45,22 +45,17 @@ def vtk_fiber(length=25., width=1., thickness=1., x=0., y=0., z=0.,
         Tensile modulus (MPa). Default is ∞ MPa.
     index : int, optional
         Fiber label.
-
-    Returns
-    -------
-    pyvista.StructuredGrid
-        VTK mesh.
-
-    Other Parameters
-    ----------------
     r_resolution : int, optional
         Number of elements along the radius of the fiber. Default is 1.
     theta_resolution : int, optional
         Number of points on the circular face of the fiber. Default is 8.
     z_resolution : int, optional
         Number of points along the length of the fiber. Default is 20.
-    _ :
-        Additional keyword arguments ignored by the function.
+
+    Returns
+    -------
+    pyvista.StructuredGrid
+        VTK mesh.
 
     .. NOTE::
         If `index` is not None, the following fields are added to the VTK mesh:
@@ -109,18 +104,15 @@ def vtk_mat(mat=None, func=None, verbose=True, **kwargs):
     func : callable, optional
         Function called for each fiber to modify the mesh or add fields.
         It takes as arguments the VTK mesh and the label of the fiber.
+    verbose : bool, optional
+        If True, a progress bar is displayed. Default is True.
+    kwargs :
+        Additional keyword arguments passed to :meth:`vtk_fiber` function.
 
     Returns
     -------
     pyvista.UnstructuredGrid
         VTK mesh.
-
-    Other Parameters
-    ----------------
-    verbose : bool, optional
-        If True, a progress bar is displayed. Default is True.
-    kwargs :
-        Additional keyword arguments passed to :meth:`vtk_fiber` function.
 
     .. NOTE::
         The following fields are added to the VTK mesh:
@@ -170,14 +162,6 @@ def vtk_mesh(mesh=None,
     ----------
     mesh : pandas.DataFrame, optional
         Fiber mesh represented by a :class:`~.Mesh` object.
-
-    Returns
-    -------
-    pyvista.UnstructuredGrid
-        VTK mesh.
-
-    Other Parameters
-    ----------------
     displacement : numpy.ndarray, optional
         Nodal displacements.
     rotation : numpy.ndarray, optional
@@ -190,6 +174,11 @@ def vtk_mesh(mesh=None,
         If True, a progress bar is displayed. Default is True.
     kwargs :
         Additional keyword arguments passed to :meth:`vtk_fiber` function.
+
+    Returns
+    -------
+    pyvista.UnstructuredGrid
+        VTK mesh.
 
     .. HINT::
         The following fields are added to the VTK mesh:
@@ -236,7 +225,7 @@ def vtk_mesh(mesh=None,
 
     # Create a VTK mesh with interpolation data
     mat = mesh.flags.mat
-    msh = vtk_mat(mat, func=interpolation_field, verbose=verbose)
+    msh = vtk_mat(mat, func=interpolation_field, verbose=verbose, **kwargs)
 
     if len(mat):
         # Interpolate fields

@@ -39,7 +39,7 @@ def solve(model, packing=1., itermax=1000,
         - 𝐟 is the vector of internal forces (*unknown Lagrange multipliers*).
         - 𝕂 is the stiffness matrix of the fiber set.
         - 𝐅 is the vector of external forces.
-        - ℂ is the matrix of non-penetration constraints.
+        - ℂ is the matrix of linear constraints.
         - 𝐇 is the vector of minimum distances between fibers.
 
     The *mechanical equilibrium* allows reformulating the problem as a system of inequalities:
@@ -66,6 +66,20 @@ def solve(model, packing=1., itermax=1000,
         Targeted value of packing. Must be greater than 1. Default is 1.0.
     itermax : int, optional
         Maximum number of solver iterations. Default is 1000.
+    solve : callable, optional
+        Sparse solver. It is a callable object that takes as inputs a sparse
+        symmetric matrix 𝔸 and a vector 𝐛 and returns the solution 𝐱 of the
+        linear system: 𝔸 𝐱 = 𝐛. Default is `scipy.sparse.linalg.spsolve`.
+    perm : numpy.ndarray, optional
+        Permutation of indices.
+    tol : float, optional
+        Tolerance used for contact detection (mm). Default is 1e-6 mm.
+    errtol : float, optional
+        Tolerance for the numerical error. Default is 1e-6.
+    interp_size : int, optional
+        Size of array used for interpolation. Default is None.
+    verbose : bool, optional
+        If True, a progress bar is displayed. Default is True.
 
     Returns
     -------
@@ -90,25 +104,6 @@ def solve(model, packing=1., itermax=1000,
 
     .. SEEALSO::
         Simulation results in the model are given as functions of a pseudo-time parameter (between 0 and 1) using :class:`~.interpolation.Interpolate` objects.
-
-    Other Parameters
-    ----------------
-    solve : callable, optional
-        Sparse solver. It is a callable object that takes as inputs a sparse
-        symmetric matrix 𝔸 and a vector 𝐛 and returns the solution 𝐱 of the
-        linear system: 𝔸 𝐱 = 𝐛. Default is `scipy.sparse.linalg.spsolve`.
-    perm : numpy.ndarray, optional
-        Permutation of indices.
-    tol : float, optional
-        Tolerance used for contact detection (mm). Default is 1e-6 mm.
-    errtol : float, optional
-        Tolerance for the numerical error. Default is 1e-6.
-    interp_size : int, optional
-        Size of array used for interpolation. Default is None.
-    verbose : bool, optional
-        If True, a progress bar is displayed. Default is True.
-    _ :
-        Additional keyword arguments ignored by the function.
 
     :Use:
         >>> # Generate a set of fibers
@@ -233,14 +228,6 @@ def plot_system(stiffness, constraint,
             Increment of internal force vector.
         dH : numpy.ndarray
             Increment of distance vector.
-
-    Returns
-    -------
-    ax : matplotlib.axes.Axes
-        Matplotlib axes.
-
-    Other Parameters
-    ----------------
     solve : callable, optional
         Sparse solver. It is a callable object that takes as inputs a sparse
         symmetric matrix 𝔸 and a vector 𝒃 and returns the solution 𝒙 of the
@@ -250,6 +237,11 @@ def plot_system(stiffness, constraint,
     tol : float, optional
         Tolerance used for contact detection (mm). Default is 1e-6 mm.
     ax : matplotlib.axes.Axes, optional
+        Matplotlib axes.
+
+    Returns
+    -------
+    ax : matplotlib.axes.Axes
         Matplotlib axes.
 
     """

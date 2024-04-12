@@ -27,9 +27,6 @@ class Net(pd.DataFrame):
         Set of fibers represented by a :class:`~.Mat` object.
     periodic : bool, optional
         If True, fibers are duplicated for periodicity. Default is True.
-
-    Other Parameters:
-    -----------------
     pairs : numpy.ndarray, optional
         Pairs of fiber indices used to find nearest points. Size: (m x 2).
 
@@ -150,18 +147,13 @@ class Net(pd.DataFrame):
             Set of fibers represented by a :class:`~.Mat` object.
         periodic : bool, optional
             If True, fibers are duplicated for periodicity. Default is True.
+        pairs : numpy.ndarray, optional
+            Pairs of fiber indices used to find nearest points. Size: (m x 2).
 
         Returns
         -------
         net : pandas.DataFrame
             Initialized :class:`Net` object.
-
-        Other Parameters
-        ----------------
-        pairs : numpy.ndarray, optional
-            Pairs of fiber indices used to find nearest points. Size: (m x 2).
-        _ :
-            Additional keyword arguments ignored by the function.
 
         """
         # Optional
@@ -423,9 +415,6 @@ class Stack(Net):
     -----------
     net : pandas.DataFrame, optional
         Fiber network represented by a :class:`Net` object.
-
-    Other Parameters:
-    -----------------
     threshold : float, optional
         Threshold distance value for proximity detection (mm).
     kwargs :
@@ -460,47 +449,12 @@ class Stack(Net):
             <BLANKLINE>
             [867 rows x 10 columns]
 
-    Data:
-    -----
-    + index : pandas.Index
-        Connection label. Each label refers to a unique connection.
-    + Pair of fibers:
-        - A : pandas.Series
-            1ˢᵗ fiber label. It must satisfy `net.A` ≤ `net.B`.
-        - B : pandas.Series
-            2ⁿᵈ fiber label. It must satisfy `net.A` ≤ `net.B`.
-    + Curvilinear abscissa:
-        - sA : pandas.Series
-            Curvilinear abscissa of node along the first fiber (mm).
-        - sB : pandas.Series
-            Curvilinear abscissa of node along the second fiber (mm).
-    + Relative node positions:
-        - xA : pandas.Series
-            X-coordinate of node along the first fiber (mm).
-        - yA : pandas.Series
-            Y-coordinate of node along the first fiber (mm).
-        - zA : pandas.Series
-            Z-coordinate of node along the first fiber (mm).
-        - xB : pandas.Series
-            X-coordinate of node along the second fiber (mm).
-        - yB : pandas.Series
-            Y-coordinate of node along the second fiber (mm).
-        - zB : pandas.Series
-            Z-coordinate of node along the second fiber (mm).
-
     ----
-
-    Attributes
-    ----------
-    :attr:`attrs` :
-        Global attributes of DataFrame.
 
     Methods
     -------
     :meth:`init` :
-        Stack fibers by gravity.
-    :meth:`check` :
-        Check that a :class:`Stack` object is defined correctly.
+        Stack a fiber network by gravity.
     :meth:`solve` :
         Solve the stacking problem.
     :meth:`constraint` :
@@ -526,15 +480,7 @@ class Stack(Net):
         `Stack.init`.
 
         """
-        if len(args) and Stack._is(args[0]):
-            # Initialize the DataFrame from argument
-            super().__init__(*args, **kwargs)
-            # Copy global flags from argument
-            self.flags.mat = args[0].flags.mat
-
-        else:
-            # Initialize the DataFrame from parameters
-            self.__init__(Stack.init(*args, **kwargs))
+        super().__init__(Stack.init(*args, **kwargs))
 
         # Check `Stack` object
         assert Stack.check(self)
@@ -544,24 +490,21 @@ class Stack(Net):
     @staticmethod
     def init(net=None, threshold=None, **kwargs):
         """
-        Stack fibers by gravity.
+        Stack a fiber network by gravity.
 
         Parameters
         ----------
         net : pandas.DataFrame, optional
             Fiber network represented by a :class:`Net` object.
-
-        Returns
-        -------
-        stack : pandas.DataFrame
-            Initialized :class:`Stack` object.
-
-        Other Parameters
-        ----------------
         threshold : float, optional
             Threshold distance value for proximity detection (mm).
         kwargs :
             Additional keyword arguments passed to the solver.
+
+        Returns
+        -------
+        stack : pandas.DataFrame
+            Stacked :class:`Net` object.
 
         .. WARNING::
             :class:`~.Mat` object is modified during execution.
@@ -578,11 +521,12 @@ class Stack(Net):
 
         # Solve the stacking problem
         linsol = Stack.solve(net, **kwargs)
+        stack = net
 
         if linsol:
             # Update DataFrames
             mat.z = linsol.x
-            net = Net(mat, **net.attrs)
+            stack = Net(mat, **net.attrs)
 
             # Remove nodes based on threshold distances between nodes
             mask = np.zeros(len(net))
@@ -590,102 +534,20 @@ class Stack(Net):
             # : 1 if kept node
             # : 2 if end node
             if threshold is not None:
-                mask[np.abs(net.zB.values - net.zA.values) <= threshold] = 1
-                mask[net.A == net.B] = 2
-                net = net[mask > 0]
-                net.reset_index(drop=True, inplace=True)
+                mask[np.abs(stack.zB.values - stack.zA.values) <= threshold] = 1
+                mask[stack.A == stack.B] = 2
+                stack = stack[mask > 0]
+                stack.reset_index(drop=True, inplace=True)
                 # Add global flags
-                net.flags.mat = mat
+                stack.flags.mat = mat
 
         # Set attributes
-        net.attrs["threshold"] = threshold
-
-        # Initialize stack DataFrame
-        stack = Stack(net)
+        stack.attrs["threshold"] = threshold
 
         # Return the `Stack` object
         return stack
 
-    # ~~~ Public properties ~~~ #
-
-    @property
-    def attrs(self):
-        """
-        Global attributes of DataFrame:
-            - n : int
-                Number of fibers. By default, it is empty (n = 0).
-            - size : float
-                Box dimensions (mm). By default, the domain is a 50 mm square cube.
-            - periodic : bool
-                Boundary periodicity. By default, the domain is periodic.
-            - threshold : float
-                Threshold distance value for proximity detection (mm).
-
-        """
-        return self._attrs
-
-    @attrs.setter
-    def attrs(self, attrs):
-        self._attrs = attrs
-
     # ~~~ Public methods ~~~ #
-
-    def check(self: pd.DataFrame):
-        """
-        Check that a :class:`Stack` object is defined correctly.
-
-        This method is called when a :class:`Stack` object is initialized.
-
-        Raises
-        ------
-        KeyError
-            If any keys are missing from the columns of :class:`Stack` object.
-        AttributeError
-            If any attributes are missing from the dictionary :attr:`attrs`.
-        IndexError
-            If row indices are incorrectly defined:
-                - Row indices are not unique in [0, ..., m-1] where m is the number of connections.
-                - Connection labels are not sorted.
-        TypeError
-            If labels are not integers.
-        ValueError
-            If any of the following conditions are not met:
-                - Fiber labels are incorrect.
-                - There are duplicate connections.
-                - Fiber labels are not ordered.
-
-        Returns
-        -------
-        bool
-            Indicates whether the object can be instantiated as :class:`Stack`.
-
-        .. TIP::
-            - If `self` is None, it returns an empty :class:`Stack` object.
-            - If a `"skip_check"` flag is True in :attr:`attrs`, the check is passed.
-
-        """
-        if self is None:
-            stack = Stack()
-        else:
-            stack = self
-
-        # Attributes
-        if not ("threshold" in stack.attrs.keys()):
-            raise AttributeError("'threshold' is not in attribute dictionary.")
-
-        # Return True if the test is correct
-        return Net.check(stack)
-
-    # ~~~ Private methods ~~~ #
-
-    def _is(self: pd.DataFrame) -> bool:
-        if self is None:
-            return False
-        try:
-            __class__.check(self)
-            return True
-        except (KeyError, AttributeError, IndexError, TypeError, ValueError):
-            return False
 
     @staticmethod
     def solve(net=None, **_):
@@ -701,11 +563,6 @@ class Stack(Net):
         -------
         linsol : OptimizeResult
             Results of linear programming solver.
-
-        Other Parameters
-        ----------------
-        _ :
-            Additional keyword arguments ignored by the function.
 
         .. SEEALSO::
             The solver is based on scipy.optimize.linprog_.
@@ -734,14 +591,7 @@ class Stack(Net):
     @staticmethod
     def constraint(net=None, **_):
         """
-        Assemble the linear system:
-
-        .. MATH::
-            \min_{z} (-\mathbf{f} \cdot \mathbf{z})
-            \quad s.t. \quad \mathbb{C} \, \mathbf{z} \leq \mathbf{H}
-            \quad and \quad \mathbf{z} \geq \mathbf{h} / 2
-        .. MATH::
-            with \quad \mathbf{f} = -\mathbf{m} \, g \quad and \quad \mathbf{h} > 0
+        Assemble the linear programming system.
 
         Parameters
         ----------
@@ -758,11 +608,6 @@ class Stack(Net):
                 Minimum distance vector.
             h : numpy.ndarray
                 Thickness vector.
-
-        Other Parameters
-        ----------------
-        _ :
-            Additional keyword arguments ignored by the function.
 
         """
         # Optional

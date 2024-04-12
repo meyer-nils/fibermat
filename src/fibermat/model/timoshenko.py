@@ -26,7 +26,7 @@ class Timoshenko:
 
     where:
         - 𝕂 is the stiffness matrix of the fiber set.
-        - ℂ is the matrix of non-penetration constraints.
+        - ℂ is the matrix of linear constraints.
         - 𝐮 is the vector of generalized displacements (*unknowns of the problem*).
         - 𝐟 is the vector of internal forces (*unknown Lagrange multipliers*).
         - 𝐅 is the vector of external forces.
@@ -95,9 +95,6 @@ class Timoshenko:
         ----------
         mesh : pandas.DataFrame, optional
             Fiber mesh represented by a :class:`~.Mesh` object.
-
-        Other Parameters
-        ----------------
         kwargs :
             Additional keyword arguments passed to matrix constructors.
 
@@ -236,6 +233,12 @@ class Timoshenko:
         -----------
         t : array-like, optional
             Interpolation parameter between 0 and 1.
+        lmin : float, optional
+            Lower bound used to rescale beam lengths (mm). Default is 0.01 mm.
+        lmax : float, optional
+            Upper bound used to rescale beam lengths (mm).
+        coupling : float, optional
+            Coupling numerical constant between 0 and 1. Default is 0.99.
 
         Returns:
         --------
@@ -250,17 +253,6 @@ class Timoshenko:
                 Increment of displacement vector.
             dF : numpy.ndarray
                 Increment of external force vector.
-
-        Other Parameters:
-        -----------------
-        lmin : float, optional
-            Lower bound used to rescale beam lengths (mm). Default is 0.01 mm.
-        lmax : float, optional
-            Upper bound used to rescale beam lengths (mm).
-        coupling : float, optional
-            Coupling numerical constant between 0 and 1. Default is 0.99.
-        _ :
-            Additional keyword arguments ignored by the function.
 
         :Use:
             >>> # Linear model (Ψ² ≫ 1)
@@ -356,10 +348,10 @@ class Timoshenko:
             i + 0, i + 1, j + 0, j + 1,
         ]).ravel()
         data = np.array([
-            k0, k1, -k0, k1,
-            k1, k2, -k1, -k4,
-            -k0, -k1, k0, -k1,
-            k1, -k4, -k1, k2
+             k0,  k1, -k0,  k1,
+             k1,  k2, -k1, -k4,
+            -k0, -k1,  k0, -k1,
+             k1, -k4, -k1,  k2
         ]).ravel()
 
         # Initialize 𝕂 matrix
@@ -428,11 +420,6 @@ class Timoshenko:
                 Increment of internal force vector.
             dH : numpy.ndarray
                 Increment of distance vector.
-
-        Other Parameters:
-        -----------------
-        _ :
-            Additional keyword arguments ignored by the function.
 
         """
         # Optional

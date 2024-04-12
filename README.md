@@ -207,7 +207,7 @@ stack = Stack(net, threshold=10)
 mesh = Mesh(stack)
 
 # Solve the mechanical packing problem
-sol = solve(Timoshenko(mesh), packing=4.)
+sol = solve(Model(mesh), packing=4.)
 
 # Export as VTK
 msh = vtk_mesh(

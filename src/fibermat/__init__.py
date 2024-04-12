@@ -101,10 +101,10 @@ stack = Stack(net, threshold=10)
 mesh = Mesh(stack)
 
 sol = solve(
-    Timoshenko(mesh),
+    Model(mesh),
     packing=4.,
     solve=lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=False),
-    perm=sp.sparse.csgraph.reverse_cuthill_mckee(Timoshenko(mesh).P, symmetric_mode=True),
+    perm=sp.sparse.csgraph.reverse_cuthill_mckee(Model(mesh).P, symmetric_mode=True),
 )
 
 # Visualize system evolution
@@ -129,7 +129,7 @@ from fibermat.mat import *
 from fibermat.net import *
 from fibermat.mesh import *
 from fibermat.solver import *
-from fibermat.model.timoshenko import *
+from fibermat.model import *
 from fibermat.utils import *
 
 __author__ = "François Mahé"

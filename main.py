@@ -74,7 +74,7 @@ if __name__ == "__main__":
     mesh = Mesh(stack)
 
     # Instantiate the model
-    model = Timoshenko(mesh)
+    model = Model(mesh)
     # Permutation of indices
     perm = sp.sparse.csgraph.reverse_cuthill_mckee(model.P, symmetric_mode=True)
     # Visualize the system
@@ -84,10 +84,10 @@ if __name__ == "__main__":
     plt.show()
 
     sol = solve(
-        Timoshenko(mesh),
+        Model(mesh),
         packing=4.,
         solve=lambda A, b: sp.sparse.linalg.spsolve(A, b, use_umfpack=False),
-        perm=sp.sparse.csgraph.reverse_cuthill_mckee(Timoshenko(mesh).P, symmetric_mode=True),
+        perm=sp.sparse.csgraph.reverse_cuthill_mckee(Model(mesh).P, symmetric_mode=True),
     )
 
     # Visualize system evolution

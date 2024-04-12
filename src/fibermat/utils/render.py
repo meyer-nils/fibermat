@@ -288,7 +288,7 @@ if __name__ == "__main__":
     mesh = Mesh(stack)
 
     # Solve the mechanical packing problem
-    sol = solve(Timoshenko(mesh), packing=4)
+    sol = solve(Model(mesh), packing=4)
 
     # Create a VTK mat
     vtk_mat(mat).plot()

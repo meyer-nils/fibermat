@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from fibermat import *
 from fibermat import Mesh
-from fibermat.model.timoshenko import Timoshenko
+from fibermat.model.timoshenko import Timoshenko as Model
 from fibermat.utils.interpolation import Interpolate
 
 
@@ -113,7 +113,7 @@ def solve(model, packing=1., itermax=1000,
         >>> # Create the fiber mesh
         >>> mesh = Mesh(net)
         >>> # Solve the mechanical packing problem
-        >>> sol = solve(Timoshenko(mesh), packing=4)
+        >>> sol = solve(Model(mesh), packing=4)
 
     """
     # Assemble the quadratic programming system
@@ -314,7 +314,7 @@ if __name__ == "__main__":
     mesh = Mesh(stack)
 
     # Solve the mechanical packing problem
-    sol = solve(Timoshenko(mesh), packing=4)
+    sol = solve(Model(mesh), packing=4)
 
     # Deform the mesh
     mesh.z += sol.displacement(1)

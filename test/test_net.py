@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from fibermat import *
+from fibermat import Mat, Net, Stack
 
 
 def equal(df1, df2):
@@ -34,7 +34,7 @@ def test_emptyNet():
     """
     net = pd.DataFrame(data=[], index=[], columns=["A", "B", "sA", "sB", "xA", "yA", "zA", "xB", "yB", "zB"], dtype=float)
     net[[*"AB"]] = net[[*"AB"]].astype(int)
-    net.attrs = dict(n=0, size=50., periodic=True)
+    net.attrs = dict(n=0, sizeX=50., sizeY=50., sizeZ=50., periodic=True)
     net.flags.mat = Mat()
     equal(Net(), net)
 
@@ -74,7 +74,7 @@ def test_Net():
 
     net = pd.DataFrame(data=data, index=index, columns=["A", "B", "sA", "sB", "xA", "yA", "zA", "xB", "yB", "zB"])
     net[[*"AB"]] = net[[*"AB"]].astype(int)
-    net.attrs = dict(n=10, size=50., periodic=True)
+    net.attrs = dict(n=10, sizeX=50., sizeY=50., sizeZ=50.,periodic=True)
     net.flags.mat = Mat(10)
     equal(Net(Mat(10)), net)
 
@@ -88,7 +88,7 @@ def test_emptyStack():
     """
     stack = pd.DataFrame(data=[], index=[], columns=["A", "B", "sA", "sB", "xA", "yA", "zA", "xB", "yB", "zB"], dtype=float)
     stack[[*"AB"]] = stack[[*"AB"]].astype(int)
-    stack.attrs = dict(n=0, size=50., periodic=True, threshold=None)
+    stack.attrs = dict(n=0, sizeX=50., sizeY=50., sizeZ=50., periodic=True, threshold=None)
     stack.flags.mat = Mat()
     equal(Stack(), stack)
 
@@ -128,7 +128,7 @@ def test_Stack():
 
     stack = pd.DataFrame(data=data, index=index, columns=["A", "B", "sA", "sB", "xA", "yA", "zA", "xB", "yB", "zB"])
     stack[[*"AB"]] = stack[[*"AB"]].astype(int)
-    stack.attrs = dict(n=10, size=50., periodic=True, threshold=None)
+    stack.attrs = dict(n=10, sizeX=50., sizeY=50., sizeZ=50., periodic=True, threshold=None)
     stack.flags.mat = Mat(10)
     equal(Stack(Net(Mat(10))), stack)
 
@@ -187,13 +187,13 @@ def test_stack_periodic():
 
 if __name__ == '__main__':
 
-    # Empy net
+    # Empty net
     test_emptyNet()
 
     # Net initialization
     test_Net()
 
-    # Empy stack
+    # Empty stack
     test_emptyStack()
 
     # Stack initialization

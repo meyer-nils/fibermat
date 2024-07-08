@@ -29,7 +29,7 @@ i = ((y + 6) // 1).astype(int)
 x, y = x[mask[i, j]], y[mask[i, j]]
 
 # Generate a set of fibers
-mat = Mat(len(x), length=1, width=0.1, thickness=0.05, size=60, tensile=400)
+mat = Mat(len(x), length=1, width=0.1, thickness=0.05, sizeX=60, sizeY=60, sizeZ=60, tensile=400)
 mat.x = x
 mat.y = -y
 # Build the fiber network

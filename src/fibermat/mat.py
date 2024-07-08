@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import warnings
+
 import numpy as np
 import pandas as pd
-import warnings
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
@@ -30,8 +31,12 @@ class Mat(pd.DataFrame):
         Fiber width (mm). Default is 1 mm.
     thickness : float, optional
         Fiber thickness (mm). Default is 1 mm.
-    size : float, optional
-        Box dimensions (mm). Default is 50 mm.
+    sizeX : float, optional
+        Box dimensions in x (mm). Default is 50 mm.
+    sizeY : float, optional
+        Box dimensions in y (mm). Default is 50 mm.
+    sizeZ : float, optional
+        Box dimensions in z (mm). Default is 50 mm.
     theta : float, optional
         In plane angle (rad). Default is π rad.
     psi : float, optional
@@ -149,8 +154,21 @@ class Mat(pd.DataFrame):
     # ~~~ Constructor ~~~ #
 
     @staticmethod
-    def init(n=0, length=25., width=1., thickness=1., size=50.,
-             theta=np.pi, psi=0., shear=1., tensile=np.inf, seed=0, **_):
+    def init(
+        n=0,
+        length=25.0,
+        width=1.0,
+        thickness=1.0,
+        sizeX=50.0,
+        sizeY=50.0,
+        sizeZ=50.0,
+        theta=np.pi,
+        psi=0.0,
+        shear=1.0,
+        tensile=np.inf,
+        seed=0,
+        **_,
+    ):
         """
         Generate a set of random straight fibers.
 
@@ -164,8 +182,12 @@ class Mat(pd.DataFrame):
             Fiber width (mm). Default is 1 mm.
         thickness : float, optional
             Fiber thickness (mm). Default is 1 mm.
-        size : float, optional
-            Box dimensions (mm). Default is 50 mm.
+        sizeX : float, optional
+            Box dimensions in x (mm). Default is 50 mm.
+        sizeY : float, optional
+            Box dimensions in y (mm). Default is 50 mm.
+        sizeZ : float, optional
+            Box dimensions in z (mm). Default is 50 mm.
         theta : float, optional
             In plane angle (rad). Default is π rad.
         psi : float, optional
@@ -191,9 +213,9 @@ class Mat(pd.DataFrame):
         b = np.full(n, width)  # : fiber width (mm)
         h = np.full(n, thickness)  # : fiber thickness (mm)
         # Fiber position
-        x = np.random.uniform(-0.5, 0.5, n) * size  # : X-coordinate (mm)
-        y = np.random.uniform(-0.5, 0.5, n) * size  # : Y-coordinate (mm)
-        z = np.random.uniform(-0.5, 0.5, n) * size  # : Z-coordinate (mm)
+        x = np.random.uniform(-0.5, 0.5, n) * sizeX  # : X-coordinate (mm)
+        y = np.random.uniform(-0.5, 0.5, n) * sizeY  # : Y-coordinate (mm)
+        z = np.random.uniform(-0.5, 0.5, n) * sizeZ  # : Z-coordinate (mm)
         z = np.sort(z)
         # Angles in radians
         p = np.random.uniform(-0.5, 0.5, n) * theta  # : in plane angle (rad)
@@ -208,13 +230,14 @@ class Mat(pd.DataFrame):
 
         # Initialize mat DataFrame
         mat = pd.DataFrame(
-            data=np.c_[l, b, h, x, y, z, u, v, w, G, E],
-            columns=[*"lbhxyzuvwGE"]
+            data=np.c_[l, b, h, x, y, z, u, v, w, G, E], columns=[*"lbhxyzuvwGE"]
         )
 
         # Set attributes
         mat.attrs["n"] = n
-        mat.attrs["size"] = size
+        mat.attrs["sizeX"] = sizeX
+        mat.attrs["sizeY"] = sizeY
+        mat.attrs["sizeZ"] = sizeZ
 
         # Return the `Mat` object
         return mat
@@ -227,8 +250,12 @@ class Mat(pd.DataFrame):
         Global attributes of DataFrame:
             - n : int
                 Number of fibers. By default, it is empty (n = 0).
-            - size : float
-                Box dimensions (mm). By default, the domain is a 50 mm square cube.
+            - sizeX : float
+                Box dimensions in x (mm). By default, the domain is a 50 mm square cube.
+            - sizeY : float
+                Box dimensions in y (mm). By default, the domain is a 50 mm square cube.
+            - sizeZ : float
+                Box dimensions in z (mm). By default, the domain is a 50 mm square cube.
 
         """
         return self._attrs
@@ -278,9 +305,11 @@ class Mat(pd.DataFrame):
             mat = self
 
         if "skip_check" in mat.attrs.keys() and mat.attrs["skip_check"]:
-            warnings.warn("{}.attrs['skip_check'] is active."
-                          "Delete it or set it to False.".format(mat.__class__),
-                          UserWarning)
+            warnings.warn(
+                "{}.attrs['skip_check'] is active."
+                "Delete it or set it to False.".format(mat.__class__),
+                UserWarning,
+            )
             return True
 
         # Keys
@@ -292,31 +321,55 @@ class Mat(pd.DataFrame):
         # Attributes
         if not ("n" in mat.attrs.keys()):
             raise AttributeError("'n' is not in attribute dictionary.")
-        if not ("size" in mat.attrs.keys()):
-            raise AttributeError("'size' is not in attribute dictionary.")
+        if not ("sizeX" in mat.attrs.keys()):
+            raise AttributeError("'sizeX' is not in attribute dictionary.")
+        if not ("sizeY" in mat.attrs.keys()):
+            raise AttributeError("'sizeY' is not in attribute dictionary.")
+        if not ("sizeZ" in mat.attrs.keys()):
+            raise AttributeError("'sizeZ' is not in attribute dictionary.")
 
         # Indices
         if len(mat) != mat.attrs["n"]:
-            raise ValueError("Attribute `n: {}` does not correspond to"
-                             " the number of fibers ({})."
-                             .format(mat.attrs["n"], len(mat)))
-        if (len(np.unique(mat.index)) != len(mat)
-                or not np.all(np.unique(mat.index) == np.arange(len(mat)))):
-            raise IndexError("Row indices must be unique in [0,..., {}]."
-                             .format(len(mat) - 1))
+            raise ValueError(
+                "Attribute `n: {}` does not correspond to"
+                " the number of fibers ({}).".format(mat.attrs["n"], len(mat))
+            )
+        if len(np.unique(mat.index)) != len(mat) or not np.all(
+            np.unique(mat.index) == np.arange(len(mat))
+        ):
+            raise IndexError(
+                "Row indices must be unique in [0,..., {}].".format(len(mat) - 1)
+            )
         if not np.all(mat.index == np.arange(len(mat))):
             raise IndexError("Fiber labels must be sorted.")
 
         # Data
         if not np.all(mat[[*"lbh"]] > 0):
             raise ValueError("Dimensions must be positive.")
-        if not np.all((-0.5 * mat.attrs["size"] <= mat[[*"xy"]])
-                      & (mat[[*"xy"]] <= 0.5 * mat.attrs["size"])):
-            raise ValueError("Positions must be in a box of size {}"
-                             " (between {} and {})."
-                             .format(mat.attrs["size"],
-                                     -0.5 * mat.attrs["size"],
-                                     0.5 * mat.attrs["size"]))
+        if not np.all(
+            (-0.5 * mat.attrs["sizeX"] <= mat["x"])
+            & (mat["x"] <= 0.5 * mat.attrs["sizeX"])
+        ):
+            raise ValueError(
+                "Positions must be in a box of size {}"
+                " (between {} and {}).".format(
+                    mat.attrs["sizeX"],
+                    -0.5 * mat.attrs["sizeX"],
+                    0.5 * mat.attrs["sizeX"],
+                )
+            )
+        if not np.all(
+            (-0.5 * mat.attrs["sizeY"] <= mat["y"])
+            & (mat["y"] <= 0.5 * mat.attrs["sizeY"])
+        ):
+            raise ValueError(
+                "Positions must be in a box of size {}"
+                " (between {} and {}).".format(
+                    mat.attrs["sizeY"],
+                    -0.5 * mat.attrs["sizeY"],
+                    0.5 * mat.attrs["sizeY"],
+                )
+            )
         if not np.allclose(np.linalg.norm(mat[[*"uvw"]], axis=1), 1):
             raise ValueError("Orientation vectors must have unit lengths.")
         if not np.all(mat[[*"GE"]] > 0):
@@ -358,8 +411,11 @@ if __name__ == "__main__":
     orientations = mat[[*"uvw"]]  # size: (n x 3)
 
     # Figure
-    fig, ax = plt.subplots(subplot_kw=dict(projection='3d', aspect='equal',
-                                           xlabel="X", ylabel="Y", zlabel="Z"))
+    fig, ax = plt.subplots(
+        subplot_kw=dict(
+            projection="3d", aspect="equal", xlabel="X", ylabel="Y", zlabel="Z"
+        )
+    )
     ax.view_init(azim=45, elev=30, roll=0)
     if len(mat):
         # Draw fibers
@@ -371,6 +427,6 @@ if __name__ == "__main__":
             B = fiber[[*"xyz"]].values + 0.5 * fiber.l * fiber[[*"uvw"]].values
             plt.plot(*np.c_[A, B])
         # Set drawing box dimensions
-        ax.set_xlim(-0.5 * mat.attrs["size"], 0.5 * mat.attrs["size"])
-        ax.set_ylim(-0.5 * mat.attrs["size"], 0.5 * mat.attrs["size"])
+        ax.set_xlim(-0.5 * mat.attrs["sizeX"], 0.5 * mat.attrs["sizeX"])
+        ax.set_ylim(-0.5 * mat.attrs["sizeY"], 0.5 * mat.attrs["sizeY"])
     plt.show()

@@ -43,8 +43,8 @@ Example
             B = fiber[[*"xyz"]].values + 0.5 * fiber.l * fiber[[*"uvw"]].values
             plt.plot(*np.c_[A, B])
         # Set drawing box dimensions
-        ax.set_xlim(-0.5 * mat.attrs["size"], 0.5 * mat.attrs["size"])
-        ax.set_ylim(-0.5 * mat.attrs["size"], 0.5 * mat.attrs["size"])
+        ax.set_xlim(-0.5 * mat.attrs["sizeX"], 0.5 * mat.attrs["sizeX"])
+        ax.set_ylim(-0.5 * mat.attrs["sizeY"], 0.5 * mat.attrs["sizeY"])
     plt.show()
 
 .. image:: ../../images/mat.png

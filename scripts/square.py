@@ -12,7 +12,7 @@ from fibermat import Mat, Mesh, Net, Stack, Timoshenko, solve, vtk_mesh
 if __name__ == "__main__":
 
     # Generate a set of fibers
-    mat = Mat(3000, length=4, width=0.2, thickness=0.05, size=40, tensile=1600)
+    mat = Mat(3000, length=4, width=0.2, thickness=0.05, sizeX=40, sizey=40, sizeZ=40, tensile=1600)
     # Build the fiber network
     net = Net(mat, periodic=True)
     # Stack fibers

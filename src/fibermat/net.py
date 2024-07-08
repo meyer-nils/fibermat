@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import warnings
+
 import numpy as np
 import pandas as pd
 import scipy as sp
-import warnings
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
 from tqdm import tqdm
@@ -164,7 +165,8 @@ class Net(pd.DataFrame):
 
         # Periodic boundary conditions (optional)
         if periodic:
-            X = Y = mat.attrs["size"]
+            X = mat.attrs["sizeX"]
+            Y = mat.attrs["sizeY"]
             # Duplicate fibers along boundaries
             l = mat.l.max()
             x1, x2 = -0.5 * X, 0.5 * X
@@ -175,16 +177,16 @@ class Net(pd.DataFrame):
             # Left/right sides
             mat_x = mat[mask_x].copy()
             mat_x["inner"] = False
-            mat_x["x"] += mat.attrs["size"]
+            mat_x["x"] += X
             # Back/front sides
             mat_y = mat[mask_y].copy()
             mat_y["inner"] = False
-            mat_y["y"] += mat.attrs["size"]
+            mat_y["y"] += Y
             # Corners
             mat_xy = mat[mask_xy].copy()
             mat_xy["inner"] = False
-            mat_xy["x"] -= mat.attrs["size"]
-            mat_xy["y"] -= mat.attrs["size"]
+            mat_xy["x"] -= X
+            mat_xy["y"] -= Y
             # Merge repeated mats
             mat_ = pd.concat([mat, mat_x, mat_y, mat_xy])
         else:
@@ -215,7 +217,7 @@ class Net(pd.DataFrame):
         UUt = U @ Ut
         Ur = U @ r
         R = 0.5 * L
-        mask = (np.linalg.det(UUt) != 0)
+        mask = np.linalg.det(UUt) != 0
         # Solve normal equations: 𝕌ᵀ·R⃗ = r⃗ ⟺ 𝕌·𝕌ᵀ·R⃗ = 𝕌·r⃗
         R[mask] = np.linalg.solve(UUt[mask], Ur[mask])
 
@@ -236,20 +238,19 @@ class Net(pd.DataFrame):
         indices = np.argsort(pairs, axis=1)
         pairs = np.take_along_axis(pairs, indices, axis=1)
         abscissa = np.take_along_axis(abscissa[..., 0], indices, axis=1)
-        df = (pd.DataFrame(np.c_[pairs, abscissa])
-              .sort_values(by=[0, 1])
-              .drop_duplicates([0, 1]))
+        df = (
+            pd.DataFrame(np.c_[pairs, abscissa])
+            .sort_values(by=[0, 1])
+            .drop_duplicates([0, 1])
+        )
         pairs = df[[0, 1]].values.astype(int)
         abscissa = df[[2, 3]].values.reshape(-1, 2, 1)
-        points = (mat_[[*"xyz"]].values[pairs]
-                  + abscissa * mat_[[*"uvw"]].values[pairs])
+        points = mat_[[*"xyz"]].values[pairs] + abscissa * mat_[[*"uvw"]].values[pairs]
 
         # Initialize net DataFrame
         net = pd.DataFrame(
-            data=np.c_[(pairs,
-                        abscissa.reshape(-1, 2),
-                        points.reshape(-1, 6))],
-            columns=["A", "B", "sA", "sB", "xA", "yA", "zA", "xB", "yB", "zB"]
+            data=np.c_[(pairs, abscissa.reshape(-1, 2), points.reshape(-1, 6))],
+            columns=["A", "B", "sA", "sB", "xA", "yA", "zA", "xB", "yB", "zB"],
         )
         # Convert type to int
         net[[*"AB"]] = net[[*"AB"]].astype(int)
@@ -272,8 +273,12 @@ class Net(pd.DataFrame):
         Global attributes of DataFrame:
             - n : int
                 Number of fibers. By default, it is empty (n = 0).
-            - size : float
-                Box dimensions (mm). By default, the domain is a 50 mm square cube.
+            - sizeX : float
+                Box dimensions in x (mm). By default, the domain is a 50 mm square cube.
+            - sizeY : float
+                Box dimensions in y (mm). By default, the domain is a 50 mm square cube.
+            - sizeZ : float
+                Box dimensions in z (mm). By default, the domain is a 50 mm square cube.
             - periodic : bool
                 Boundary periodicity. By default, the domain is periodic.
 
@@ -326,9 +331,11 @@ class Net(pd.DataFrame):
             net = self
 
         if "skip_check" in net.attrs.keys() and net.attrs["skip_check"]:
-            warnings.warn("{}.attrs['skip_check'] is active."
-                          " Delete it or set it to False.".format(net.__class__),
-                          UserWarning)
+            warnings.warn(
+                "{}.attrs['skip_check'] is active."
+                " Delete it or set it to False.".format(net.__class__),
+                UserWarning,
+            )
             return True
 
         assert Mat.check(net.flags.mat)
@@ -342,15 +349,20 @@ class Net(pd.DataFrame):
         # Attributes
         if not ("n" in net.attrs.keys()):
             raise AttributeError("'n' is not in attribute dictionary.")
-        if not ("size" in net.attrs.keys()):
-            raise AttributeError("'size' is not in attribute dictionary.")
+        if not ("sizeX" in net.attrs.keys()):
+            raise AttributeError("'sizeX' is not in attribute dictionary.")
+        if not ("sizeY" in net.attrs.keys()):
+            raise AttributeError("'sizeY' is not in attribute dictionary.")
+        if not ("sizeZ" in net.attrs.keys()):
+            raise AttributeError("'sizeZ' is not in attribute dictionary.")
         if not ("periodic" in net.attrs.keys()):
             raise AttributeError("'periodic' is not in attribute dictionary.")
 
         # Indices
         if not np.all(np.unique(net.index) == np.arange(len(net))):
-            raise IndexError("Row indices must be unique in [0,..., {}]."
-                             .format(len(net) - 1))
+            raise IndexError(
+                "Row indices must be unique in [0,..., {}].".format(len(net) - 1)
+            )
         if not np.all(net.index == np.arange(len(net))):
             raise IndexError("Connection labels must be sorted.")
 
@@ -359,13 +371,16 @@ class Net(pd.DataFrame):
             raise TypeError("Fiber labels are not integers.")
 
         # Data
-        if len(net) and not (0 <= net[[*"AB"]].values.min()
-                             and net[[*"AB"]].values.max() < net.attrs["n"]):
-            raise ValueError("Fiber labels must be in [0,..., {}]."
-                             .format(net.attrs["n"] - 1))
-        if (len(net) != len(
-                net[["A", "B", "sA", "sB"]].drop_duplicates(
-                    ignore_index=True))):
+        if len(net) and not (
+            0 <= net[[*"AB"]].values.min()
+            and net[[*"AB"]].values.max() < net.attrs["n"]
+        ):
+            raise ValueError(
+                "Fiber labels must be in [0,..., {}].".format(net.attrs["n"] - 1)
+            )
+        if len(net) != len(
+            net[["A", "B", "sA", "sB"]].drop_duplicates(ignore_index=True)
+        ):
             raise ValueError("Connections must be unique.")
         if not np.all(net.A <= net.B):
             raise ValueError("Pairs of fiber labels must be ordered: A ≤ B.")
@@ -582,7 +597,7 @@ class Stack(Net):
         if net.attrs["n"]:
             # Linear programming solver
             bounds = np.c_[0.5 * h, np.full(len(h), np.inf)]
-            linsol = sp.optimize.linprog(f, C, H, bounds=bounds, method='highs')
+            linsol = sp.optimize.linprog(f, C, H, bounds=bounds, method="highs")
         else:
             linsol = None
 
@@ -634,8 +649,9 @@ class Stack(Net):
         data = np.array([I, -I]).ravel()
 
         # Initialize ℂ matrix
-        C = sp.sparse.coo_matrix((data, (row, col)),
-                                 shape=(1 * len(net[mask]), 1 * len(mat)))
+        C = sp.sparse.coo_matrix(
+            (data, (row, col)), shape=(1 * len(net[mask]), 1 * len(mat))
+        )
 
         # Initialize 𝒇 and 𝑯 vectors
         mg = np.pi / 4 * mat[[*"lbh"]].prod(axis=1)  # : potential field
@@ -676,15 +692,19 @@ if __name__ == "__main__":
     # Normalize by fiber weight
     load /= np.pi / 4 * mat[[*"lbh"]].prod(axis=1).mean()
     # Get loaded nodes
-    points = (stack[stack.A < stack.B][["xA", "yA", "zA", "xB", "yB", "zB"]]
-              .values.reshape(-1, 2, 3))
+    points = stack[stack.A < stack.B][
+        ["xA", "yA", "zA", "xB", "yB", "zB"]
+    ].values.reshape(-1, 2, 3)
     # Prepare color scale
     cmap = plt.cm.viridis
     color = interp1d([np.min(load), np.max(load)], [0, 1])
 
     # Figure
-    fig, ax = plt.subplots(subplot_kw=dict(projection='3d', aspect='equal',
-                                           xlabel="X", ylabel="Y", zlabel="Z"))
+    fig, ax = plt.subplots(
+        subplot_kw=dict(
+            projection="3d", aspect="equal", xlabel="X", ylabel="Y", zlabel="Z"
+        )
+    )
     ax.view_init(azim=45, elev=30, roll=0)
     if len(mat):
         # Draw fibers
@@ -698,10 +718,10 @@ if __name__ == "__main__":
     if len(points):
         # Draw contacts
         for point in tqdm(points[~np.isclose(f, 0)], desc="Draw nodes"):
-            plt.plot(*point.T, '--ok', lw=1, mfc='none', ms=3, alpha=0.2)
+            plt.plot(*point.T, "--ok", lw=1, mfc="none", ms=3, alpha=0.2)
     # Set drawing box dimensions
-    ax.set_xlim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])
-    ax.set_ylim(-0.5 * stack.attrs["size"], 0.5 * stack.attrs["size"])
+    ax.set_xlim(-0.5 * stack.attrs["sizeX"], 0.5 * stack.attrs["sizeX"])
+    ax.set_ylim(-0.5 * stack.attrs["sizeY"], 0.5 * stack.attrs["sizeY"])
     # Add a color bar
     norm = plt.Normalize(vmin=np.min(load), vmax=np.max(load))
     smap = plt.cm.ScalarMappable(cmap=cmap, norm=norm)

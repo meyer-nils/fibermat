@@ -3,9 +3,7 @@
 
 import ipywidgets
 import numpy as np
-from IPython.display import display, HTML
-
-from fibermat import *
+from IPython.display import display
 
 
 class Settings(dict):
@@ -26,10 +24,31 @@ class Settings(dict):
     ----
 
     """
-    def __init__(self, n=0, length=25., width=1., thickness=1., size=50.,
-                 theta=1., shear=1., tensile=np.inf, seed=0, periodic=True,
-                 threshold=None, packing=1., itermax=1000, tol=1e-6, lmin=None,
-                 lmax=None, coupling=1.0, interp_size=None, verbose=True):
+
+    def __init__(
+        self,
+        n=0,
+        length=25.0,
+        width=1.0,
+        thickness=1.0,
+        sizeX=50.0,
+        sizeY=50.0,
+        sizeZ=50.0,
+        theta=1.0,
+        shear=1.0,
+        tensile=np.inf,
+        seed=0,
+        periodic=True,
+        threshold=None,
+        packing=1.0,
+        itermax=1000,
+        tol=1e-6,
+        lmin=None,
+        lmax=None,
+        coupling=1.0,
+        interp_size=None,
+        verbose=True,
+    ):
         """
         Initialize a `Settings` widget.
 
@@ -42,32 +61,115 @@ class Settings(dict):
         self.n = ipywidgets.IntText(value=n, description="N")
         self.length = ipywidgets.FloatText(value=length, step=5.0, description="LENGTH")
         self.width = ipywidgets.FloatText(value=width, step=1.0, description="WIDTH")
-        self.thickness = ipywidgets.FloatText(value=thickness, step=0.1, description="THICKNESS")
-        self.size = ipywidgets.FloatText(value=size, step=10.0, description="SIZE")
-        self.theta = ipywidgets.FloatSlider(value=theta, min=0.0, max=1.0, step=0.01, readout_format=".1%", description="THETA")
-        self.shear = ipywidgets.FloatText(value=(shear if shear != np.inf else 1.0), step=1.0, layout=ipywidgets.Layout(width='100px'))
-        self.shear.switch = ipywidgets.Checkbox(value=not (shear is np.inf), description="SHEAR", layout=ipywidgets.Layout(width='196px'))
-        self.tensile = ipywidgets.FloatText(value=(tensile if tensile  != np.inf else shear * (length / thickness) ** 2), step=1.0, layout=ipywidgets.Layout(width='100px'))
-        self.tensile.switch = ipywidgets.Checkbox(value=not (tensile is np.inf), description="TENSILE", layout=ipywidgets.Layout(width='196px'))
-        self.seed = ipywidgets.IntText(value=(seed if seed is not None else 0), layout=ipywidgets.Layout(width='100px'))
-        self.seed.switch = ipywidgets.Checkbox(value=not (seed is None), description="SEED", layout=ipywidgets.Layout(width='196px'))
+        self.thickness = ipywidgets.FloatText(
+            value=thickness, step=0.1, description="THICKNESS"
+        )
+        self.sizeX = ipywidgets.FloatText(value=sizeX, step=10.0, description="SIZEX")
+        self.sizeY = ipywidgets.FloatText(value=sizeY, step=10.0, description="SIZEY")
+        self.sizeZ = ipywidgets.FloatText(value=sizeZ, step=10.0, description="SIZEZ")
+        self.theta = ipywidgets.FloatSlider(
+            value=theta,
+            min=0.0,
+            max=1.0,
+            step=0.01,
+            readout_format=".1%",
+            description="THETA",
+        )
+        self.shear = ipywidgets.FloatText(
+            value=(shear if shear != np.inf else 1.0),
+            step=1.0,
+            layout=ipywidgets.Layout(width="100px"),
+        )
+        self.shear.switch = ipywidgets.Checkbox(
+            value=not (shear is np.inf),
+            description="SHEAR",
+            layout=ipywidgets.Layout(width="196px"),
+        )
+        self.tensile = ipywidgets.FloatText(
+            value=(tensile if tensile != np.inf else shear * (length / thickness) ** 2),
+            step=1.0,
+            layout=ipywidgets.Layout(width="100px"),
+        )
+        self.tensile.switch = ipywidgets.Checkbox(
+            value=not (tensile is np.inf),
+            description="TENSILE",
+            layout=ipywidgets.Layout(width="196px"),
+        )
+        self.seed = ipywidgets.IntText(
+            value=(seed if seed is not None else 0),
+            layout=ipywidgets.Layout(width="100px"),
+        )
+        self.seed.switch = ipywidgets.Checkbox(
+            value=not (seed is None),
+            description="SEED",
+            layout=ipywidgets.Layout(width="196px"),
+        )
 
         self.periodic = ipywidgets.Checkbox(value=periodic, description="PERIODIC")
-        self.threshold = ipywidgets.FloatText(value=(threshold if threshold is not None else 20 * thickness), step=0.5, layout=ipywidgets.Layout(width='100px'))
-        self.threshold.switch = ipywidgets.Checkbox(value=not (threshold is None), description="THRESHOLD", layout=ipywidgets.Layout(width='196px'))
+        self.threshold = ipywidgets.FloatText(
+            value=(threshold if threshold is not None else 20 * thickness),
+            step=0.5,
+            layout=ipywidgets.Layout(width="100px"),
+        )
+        self.threshold.switch = ipywidgets.Checkbox(
+            value=not (threshold is None),
+            description="THRESHOLD",
+            layout=ipywidgets.Layout(width="196px"),
+        )
 
-        self.packing = ipywidgets.FloatText(value=packing, step=0.5, description="PACKING")
-        self.itermax = ipywidgets.FloatLogSlider(value=itermax, min=0, max=6, step=1, readout_format=".0e", description="ITERMAX")
-        self.tol = ipywidgets.FloatLogSlider(value=tol, min=-10.0, max=-1.0, step=1.0, readout_format=".0e", description="TOL")
+        self.packing = ipywidgets.FloatText(
+            value=packing, step=0.5, description="PACKING"
+        )
+        self.itermax = ipywidgets.FloatLogSlider(
+            value=itermax,
+            min=0,
+            max=6,
+            step=1,
+            readout_format=".0e",
+            description="ITERMAX",
+        )
+        self.tol = ipywidgets.FloatLogSlider(
+            value=tol,
+            min=-10.0,
+            max=-1.0,
+            step=1.0,
+            readout_format=".0e",
+            description="TOL",
+        )
 
-        self.lmin = ipywidgets.FloatText(value=(lmin if lmin is not None else 0.01), step=0.01, layout=ipywidgets.Layout(width='100px'))
-        self.lmin.switch = ipywidgets.Checkbox(value=not (lmin is None), description="LMIN", layout=ipywidgets.Layout(width='196px'))
-        self.lmax = ipywidgets.FloatText(value=(lmax if lmax is not None else length), step=0.01, layout=ipywidgets.Layout(width='100px'))
-        self.lmax.switch = ipywidgets.Checkbox(value=not (lmax is None), description="LMAX", layout=ipywidgets.Layout(width='196px'))
-        self.coupling = ipywidgets.FloatText(value=coupling, step=0.01, description="COUPLING")
+        self.lmin = ipywidgets.FloatText(
+            value=(lmin if lmin is not None else 0.01),
+            step=0.01,
+            layout=ipywidgets.Layout(width="100px"),
+        )
+        self.lmin.switch = ipywidgets.Checkbox(
+            value=not (lmin is None),
+            description="LMIN",
+            layout=ipywidgets.Layout(width="196px"),
+        )
+        self.lmax = ipywidgets.FloatText(
+            value=(lmax if lmax is not None else length),
+            step=0.01,
+            layout=ipywidgets.Layout(width="100px"),
+        )
+        self.lmax.switch = ipywidgets.Checkbox(
+            value=not (lmax is None),
+            description="LMAX",
+            layout=ipywidgets.Layout(width="196px"),
+        )
+        self.coupling = ipywidgets.FloatText(
+            value=coupling, step=0.01, description="COUPLING"
+        )
 
-        self.interp_size = ipywidgets.IntText(value=(interp_size if interp_size is not None else 100), layout=ipywidgets.Layout(width='100px'))
-        self.interp_size.switch = ipywidgets.Checkbox(value=not (interp_size is None), description="INTERPSIZE", layout=ipywidgets.Layout(width='196px'))
+        self.interp_size = ipywidgets.IntText(
+            value=(interp_size if interp_size is not None else 100),
+            layout=ipywidgets.Layout(width="100px"),
+        )
+        self.interp_size.switch = ipywidgets.Checkbox(
+            value=not (interp_size is None),
+            description="INTERPSIZE",
+            layout=ipywidgets.Layout(width="196px"),
+        )
         self.verbose = ipywidgets.Checkbox(value=verbose, description="VERBOSE")
 
         def shear_on_changed(*args):
@@ -92,40 +194,53 @@ class Settings(dict):
             self.interp_size.disabled = not self.interp_size.switch.value
 
         # Click events
-        self.shear.switch.observe(shear_on_changed) ; shear_on_changed()
-        self.tensile.switch.observe(tensile_on_changed) ; tensile_on_changed()
-        self.seed.switch.observe(seed_on_changed) ; seed_on_changed()
-        self.threshold.switch.observe(threshold_on_changed) ; threshold_on_changed()
-        self.lmin.switch.observe(lmin_on_changed) ; lmin_on_changed()
-        self.lmax.switch.observe(lmax_on_changed) ; lmax_on_changed()
-        self.interp_size.switch.observe(interp_size_on_changed) ; interp_size_on_changed()
+        self.shear.switch.observe(shear_on_changed)
+        shear_on_changed()
+        self.tensile.switch.observe(tensile_on_changed)
+        tensile_on_changed()
+        self.seed.switch.observe(seed_on_changed)
+        seed_on_changed()
+        self.threshold.switch.observe(threshold_on_changed)
+        threshold_on_changed()
+        self.lmin.switch.observe(lmin_on_changed)
+        lmin_on_changed()
+        self.lmax.switch.observe(lmax_on_changed)
+        lmax_on_changed()
+        self.interp_size.switch.observe(interp_size_on_changed)
+        interp_size_on_changed()
 
         # Initialize widget dictionary
-        super().__init__(dict(
-            n=self.n,
-            length=self.length,
-            width=self.width,
-            thickness=self.thickness,
-            size=self.size,
-            theta=self.theta,
-            shear=ipywidgets.HBox([self.shear.switch, self.shear]),
-            tensile=ipywidgets.HBox([self.tensile.switch, self.tensile]),
-            seed=ipywidgets.HBox([self.seed.switch, self.seed]),
-            #
-            periodic=self.periodic,
-            threshold=ipywidgets.HBox([self.threshold.switch, self.threshold]),
-            #
-            packing=self.packing,
-            itermax=self.itermax,
-            tol=self.tol,
-            #
-            lmin=ipywidgets.HBox([self.lmin.switch, self.lmin]),
-            lmax=ipywidgets.HBox([self.lmax.switch, self.lmax]),
-            coupling=self.coupling,
-            #
-            interp_size=ipywidgets.HBox([self.interp_size.switch, self.interp_size]),
-            verbose=self.verbose,
-        ))
+        super().__init__(
+            dict(
+                n=self.n,
+                length=self.length,
+                width=self.width,
+                thickness=self.thickness,
+                sizeX=self.sizeX,
+                sizeY=self.sizeY,
+                sizeZ=self.sizeZ,
+                theta=self.theta,
+                shear=ipywidgets.HBox([self.shear.switch, self.shear]),
+                tensile=ipywidgets.HBox([self.tensile.switch, self.tensile]),
+                seed=ipywidgets.HBox([self.seed.switch, self.seed]),
+                #
+                periodic=self.periodic,
+                threshold=ipywidgets.HBox([self.threshold.switch, self.threshold]),
+                #
+                packing=self.packing,
+                itermax=self.itermax,
+                tol=self.tol,
+                #
+                lmin=ipywidgets.HBox([self.lmin.switch, self.lmin]),
+                lmax=ipywidgets.HBox([self.lmax.switch, self.lmax]),
+                coupling=self.coupling,
+                #
+                interp_size=ipywidgets.HBox(
+                    [self.interp_size.switch, self.interp_size]
+                ),
+                verbose=self.verbose,
+            )
+        )
 
     # ~~~ Private methods ~~~ #
 
@@ -162,13 +277,17 @@ class Settings(dict):
         if name == "theta":
             return self.__getattribute__(name).value * np.pi
         elif name in ["shear", "tensile"]:
-            return (self.__getattribute__(name).value
-                    if self.__getattribute__(name).switch.value
-                    else np.inf)
+            return (
+                self.__getattribute__(name).value
+                if self.__getattribute__(name).switch.value
+                else np.inf
+            )
         elif name in ["seed", "threshold", "lmin", "lmax", "interp_size"]:
-            return (self.__getattribute__(name).value
-                    if self.__getattribute__(name).switch.value
-                    else None)
+            return (
+                self.__getattribute__(name).value
+                if self.__getattribute__(name).switch.value
+                else None
+            )
         elif name == "itermax":
             return int(self.__getattribute__(name).value)
         else:
@@ -192,13 +311,13 @@ class Settings(dict):
 
         """
         if name in ["shear", "tensile"]:
-            self.__getattribute__(name).switch.value = (False if value is np.inf
-                                                        else True)
+            self.__getattribute__(name).switch.value = (
+                False if value is np.inf else True
+            )
             if value is not np.inf:
                 self.__getattribute__(name).value = value
         elif name in ["seed", "threshold", "lmin", "lmax", "interp_size"]:
-            self.__getattribute__(name).switch.value = (False if value is None
-                                                        else True)
+            self.__getattribute__(name).switch.value = False if value is None else True
             if value is not None:
                 self.__getattribute__(name).value = value
         else:

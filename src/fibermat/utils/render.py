@@ -12,9 +12,24 @@ from fibermat import *
 from fibermat import Mat, Mesh
 
 
-def vtk_fiber(length=25., width=1., thickness=1., x=0., y=0., z=0.,
-              u=1., v=0., w=0., shear=1., tensile=np.inf, index=None,
-              r_resolution=1, theta_resolution=8, z_resolution=20, **_):
+def vtk_fiber(
+    length=25.0,
+    width=1.0,
+    thickness=1.0,
+    x=0.0,
+    y=0.0,
+    z=0.0,
+    u=1.0,
+    v=0.0,
+    w=0.0,
+    shear=1.0,
+    tensile=np.inf,
+    index=None,
+    r_resolution=1,
+    theta_resolution=8,
+    z_resolution=20,
+    **_,
+):
     """
     Export a fiber as VTK mesh using `pyvista.CylinderStructured
     <https://docs.pyvista.org/version/stable/api/utilities/_autosummary/pyvista.CylinderStructured.html>`_.
@@ -68,9 +83,11 @@ def vtk_fiber(length=25., width=1., thickness=1., x=0., y=0., z=0.,
 
     """
     # Create the VTK mesh (cylindrical structured grid)
-    msh = pv.CylinderStructured(radius=np.linspace(0.5, 0, r_resolution + 1),
-                                theta_resolution=theta_resolution,
-                                z_resolution=z_resolution)
+    msh = pv.CylinderStructured(
+        radius=np.linspace(0.5, 0, r_resolution + 1),
+        theta_resolution=theta_resolution,
+        z_resolution=z_resolution,
+    )
 
     l, b, h = length, width, thickness
 
@@ -85,9 +102,7 @@ def vtk_fiber(length=25., width=1., thickness=1., x=0., y=0., z=0.,
 
     # Transform the mesh (scale, rotate, and translate)
     msh.scale([l, b, h], inplace=True)
-    pv.translate(msh,
-                 center=(x, y, z),
-                 direction=(u, v, w))
+    pv.translate(msh, center=(x, y, z), direction=(u, v, w))
 
     # Return VTK mesh
     return msh
@@ -136,9 +151,7 @@ def vtk_mat(mat=None, func=None, verbose=True, **kwargs):
         # Get fiber
         fiber = mat.loc[i].astype(float)
         # Create the VTK mesh (cylindrical structured grid)
-        msh = vtk_fiber(*fiber[[*"lbhxyzuvwGE"]].values,
-                        index=i,
-                        **kwargs)
+        msh = vtk_fiber(*fiber[[*"lbhxyzuvwGE"]].values, index=i, **kwargs)
         if func is not None:
             # Create additional fields
             func(msh, i)
@@ -149,12 +162,15 @@ def vtk_mat(mat=None, func=None, verbose=True, **kwargs):
     return pv.MultiBlock(fibers).combine()
 
 
-def vtk_mesh(mesh=None,
-             displacement=None,
-             rotation=None,
-             force=None,
-             torque=None,
-             verbose=True, **kwargs):
+def vtk_mesh(
+    mesh=None,
+    displacement=None,
+    rotation=None,
+    force=None,
+    torque=None,
+    verbose=True,
+    **kwargs,
+):
     """
     Export a :class:`~.Mesh` object as VTK mesh.
 
@@ -215,7 +231,7 @@ def vtk_mesh(mesh=None,
         # Correct indices (s_k <= x_i < s_{k+1}, k \in [-1, n])
         k = k * (x > s[k]) + (k - 1) * (x <= s[k])
         # Indices containing relative distances (`np.floor(j) == k`)
-        j = ((x - s[k]) / (s[k + 1] - s[k]))
+        j = (x - s[k]) / (s[k + 1] - s[k])
         # Correct issues for periodic mesh
         j = np.array([*j])
         j[j == np.inf] = 0
@@ -248,20 +264,27 @@ def vtk_mesh(mesh=None,
 
     # Periodic boundary conditions (optional)
     if len(mat) and mesh.attrs["periodic"]:
-        X = Y = mat.attrs["size"]
+        X = mat.attrs["sizeX"]
+        Y = mat.attrs["sizeY"]
         Z1, Z2 = np.min(msh.points), np.max(msh.points)
         # Duplicate mesh for periodic conditions
-        msh = pv.MultiBlock([
-            msh,
-            msh.copy().translate([-X, 0, 0]),
-            msh.copy().translate([X, 0, 0]),
-            msh.copy().translate([0, -Y, 0]),
-            msh.copy().translate([0, Y, 0]),
-            msh.copy().translate([-X, -Y, 0]),
-            msh.copy().translate([-X, Y, 0]),
-            msh.copy().translate([X, -Y, 0]),
-            msh.copy().translate([X, Y, 0]),
-        ]).combine().clip_box([-X, X, -Y, Y, Z1, Z2], invert=False)
+        msh = (
+            pv.MultiBlock(
+                [
+                    msh,
+                    msh.copy().translate([-X, 0, 0]),
+                    msh.copy().translate([X, 0, 0]),
+                    msh.copy().translate([0, -Y, 0]),
+                    msh.copy().translate([0, Y, 0]),
+                    msh.copy().translate([-X, -Y, 0]),
+                    msh.copy().translate([-X, Y, 0]),
+                    msh.copy().translate([X, -Y, 0]),
+                    msh.copy().translate([X, Y, 0]),
+                ]
+            )
+            .combine()
+            .clip_box([-X, X, -Y, Y, Z1, Z2], invert=False)
+        )
 
     # Return VTK mesh
     return msh

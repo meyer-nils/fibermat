@@ -50,8 +50,8 @@ Example
                 # Draw fiber end nodes
                 plt.plot(*np.c_[a, c], '+k', ms=3, alpha=0.2)
     # Set drawing box dimensions
-    ax.set_xlim(-0.5 * mesh.attrs["size"], 0.5 * mesh.attrs["size"])
-    ax.set_ylim(-0.5 * mesh.attrs["size"], 0.5 * mesh.attrs["size"])
+    ax.set_xlim(-0.5 * mesh.attrs["sizeX"], 0.5 * mesh.attrs["sizeX"])
+    ax.set_ylim(-0.5 * mesh.attrs["sizeY"], 0.5 * mesh.attrs["sizeY"])
     plt.show()
 
 .. image:: ../../images/mesh.png

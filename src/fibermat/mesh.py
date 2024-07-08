@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import warnings
+
 import numpy as np
 import pandas as pd
-import warnings
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
@@ -110,8 +111,11 @@ class Mesh(pd.DataFrame):
         `Mesh.init`.
 
         """
-        if (len(args) and isinstance(args[0], pd.DataFrame)
-                and not isinstance(args[0], Net)):
+        if (
+            len(args)
+            and isinstance(args[0], pd.DataFrame)
+            and not isinstance(args[0], Net)
+        ):
             # Initialize the DataFrame from argument
             super().__init__(*args, **kwargs)
             # Copy global attributes from argument
@@ -157,8 +161,7 @@ class Mesh(pd.DataFrame):
 
         # Initialize mesh DataFrame
         mesh = pd.DataFrame(
-            data=np.c_[pairs, abscissa, points],
-            columns=["fiber", *"sxyz"]
+            data=np.c_[pairs, abscissa, points], columns=["fiber", *"sxyz"]
         )
         mesh["beam"] = 0
         mesh["constraint"] = 0
@@ -178,8 +181,7 @@ class Mesh(pd.DataFrame):
             mesh.sort_values(by=["fiber", "s"], inplace=True)
             # Intra-fiber elements
             mesh.beam = np.hstack(
-                mesh.groupby("fiber")
-                .apply(lambda x: np.roll(x.index, -1))
+                mesh.groupby("fiber").apply(lambda x: np.roll(x.index, -1))
             )
             # Reorder nodes
             indices = np.argsort(mesh.index).astype(int)
@@ -187,7 +189,7 @@ class Mesh(pd.DataFrame):
             mesh.beam = indices[mesh.beam]
             mesh.constraint = indices[mesh.constraint]
             # Correct end nodes
-            mask = (mesh.fiber.values == mesh.fiber.loc[mesh.constraint].values)
+            mask = mesh.fiber.values == mesh.fiber.loc[mesh.constraint].values
             mesh.constraint.values[mask] = mesh.index[mask]
 
         # Return the `Mesh` object
@@ -201,8 +203,12 @@ class Mesh(pd.DataFrame):
         Global attributes of DataFrame:
             - n : int
                 Number of fibers. By default, it is empty (n = 0).
-            - size : float
-                Box dimensions (mm). By default, the domain is a 50 mm square cube.
+            - sizeX : float
+                Box dimension in x (mm). By default, the domain is a 50 mm square cube.
+            - sizeY : float
+                Box dimension in y (mm). By default, the domain is a 50 mm square cube.
+            - sizeZ : float
+                Box dimension in z (mm). By default, the domain is a 50 mm square cube.
             - periodic : bool
                 Boundary periodicity. By default, the domain is periodic.
             - threshold : float, optional
@@ -254,9 +260,11 @@ class Mesh(pd.DataFrame):
             mesh = self
 
         if "skip_check" in mesh.attrs.keys() and mesh.attrs["skip_check"]:
-            warnings.warn("{}.attrs['skip_check'] is active."
-                          " Delete it or set it to False.".format(mesh.__class__),
-                          UserWarning)
+            warnings.warn(
+                "{}.attrs['skip_check'] is active."
+                " Delete it or set it to False.".format(mesh.__class__),
+                UserWarning,
+            )
             return True
 
         assert Mat.check(mesh.flags.mat)
@@ -270,15 +278,20 @@ class Mesh(pd.DataFrame):
         # Attributes
         if not ("n" in mesh.attrs.keys()):
             raise AttributeError("'n' is not in attribute dictionary.")
-        if not ("size" in mesh.attrs.keys()):
-            raise AttributeError("'size' is not in attribute dictionary.")
+        if not ("sizeX" in mesh.attrs.keys()):
+            raise AttributeError("'sizeX' is not in attribute dictionary.")
+        if not ("sizeY" in mesh.attrs.keys()):
+            raise AttributeError("'sizeY' is not in attribute dictionary.")
+        if not ("sizeZ" in mesh.attrs.keys()):
+            raise AttributeError("'sizeZ' is not in attribute dictionary.")
         if not ("periodic" in mesh.attrs.keys()):
             raise AttributeError("'periodic' is not in attribute dictionary.")
 
         # Indices
         if not np.all(np.unique(mesh.index) == np.arange(len(mesh))):
-            raise IndexError("Row indices must be unique in [0,..., {}]."
-                             .format(len(mesh) - 1))
+            raise IndexError(
+                "Row indices must be unique in [0,..., {}].".format(len(mesh) - 1)
+            )
         if not np.all(mesh.index == np.arange(len(mesh))):
             raise IndexError("Node labels must be sorted.")
 
@@ -290,36 +303,37 @@ class Mesh(pd.DataFrame):
 
         # Data
         if len(mesh):
-            if not (0 <= mesh.fiber.min()
-                    and mesh.fiber.max() < mesh.attrs["n"]):
-                raise ValueError("Fiber labels must be in [0,..., {}]."
-                                 .format(mesh.attrs["n"] - 1))
+            if not (0 <= mesh.fiber.min() and mesh.fiber.max() < mesh.attrs["n"]):
+                raise ValueError(
+                    "Fiber labels must be in [0,..., {}].".format(mesh.attrs["n"] - 1)
+                )
             if not (0 <= mesh.beam.min() and mesh.beam.max() < len(mesh)):
-                raise ValueError("Beam labels must be in [0,..., {}]."
-                                 .format(len(mesh) - 1))
-            if not (0 <= mesh.constraint.min()
-                    and mesh.constraint.max() < len(mesh)):
-                raise ValueError("Constraint labels must be in [0,..., {}]."
-                                 .format(len(mesh) - 1))
+                raise ValueError(
+                    "Beam labels must be in [0,..., {}].".format(len(mesh) - 1)
+                )
+            if not (0 <= mesh.constraint.min() and mesh.constraint.max() < len(mesh)):
+                raise ValueError(
+                    "Constraint labels must be in [0,..., {}].".format(len(mesh) - 1)
+                )
             if not np.all(np.sort(mesh.fiber) == mesh.fiber):
                 raise ValueError("Fibers are not sorted.")
-            if not np.all(mesh.sort_values(by=["fiber", "s"]).index
-                          == mesh.index):
+            if not np.all(mesh.sort_values(by=["fiber", "s"]).index == mesh.index):
                 raise ValueError("Nodes are not ordered along fibers.")
-            if not np.all(mesh.beam == np.hstack(
+            if not np.all(
+                mesh.beam
+                == np.hstack(
                     mesh.groupby("fiber").apply(lambda x: np.roll(x.index, -1))
-            )):
+                )
+            ):
                 raise ValueError("Beams are not sorted.")
             if not np.all(mesh.constraint[mesh.constraint].values == mesh.index):
                 raise ValueError("Constraints are not reciprocal.")
-            end1 = mesh.loc[(mesh.groupby("fiber")
-                             .apply(lambda x: x.index[0]))]
-            end2 = mesh.loc[(mesh.groupby("fiber")
-                             .apply(lambda x: x.index[-1]))]
-            if (not np.all(end1.constraint == end1.index)
-                    or not np.all(end2.constraint == end2.index)):
-                raise ValueError(
-                    "End node constraints must be equal to node labels.")
+            end1 = mesh.loc[(mesh.groupby("fiber").apply(lambda x: x.index[0]))]
+            end2 = mesh.loc[(mesh.groupby("fiber").apply(lambda x: x.index[-1]))]
+            if not np.all(end1.constraint == end1.index) or not np.all(
+                end2.constraint == end2.index
+            ):
+                raise ValueError("End node constraints must be equal to node labels.")
 
         # Return True if the test is correct
         return True
@@ -356,27 +370,31 @@ if __name__ == "__main__":
     # -> returns True if correct, otherwise it raises an error.
 
     # Figure
-    fig, ax = plt.subplots(subplot_kw=dict(projection='3d', aspect='equal',
-                                           xlabel="X", ylabel="Y", zlabel="Z"))
+    fig, ax = plt.subplots(
+        subplot_kw=dict(
+            projection="3d", aspect="equal", xlabel="X", ylabel="Y", zlabel="Z"
+        )
+    )
     ax.view_init(azim=45, elev=30, roll=0)
     if len(mesh):
         # Draw elements
-        for i, j, k in tqdm(zip(mesh.index, mesh.beam, mesh.constraint),
-                            total=len(mesh), desc="Draw mesh"):
+        for i, j, k in tqdm(
+            zip(mesh.index, mesh.beam, mesh.constraint),
+            total=len(mesh),
+            desc="Draw mesh",
+        ):
             # Get element data
             a, b, c = mesh.iloc[[i, j, k]][[*"xyz"]].values
             if mesh.iloc[i].s < mesh.iloc[j].s:
                 # Draw intra-fiber connection
-                plt.plot(*np.c_[a, b],
-                         c=plt.cm.tab10(mesh.fiber.iloc[i] % 10))
+                plt.plot(*np.c_[a, b], c=plt.cm.tab10(mesh.fiber.iloc[i] % 10))
             if mesh.iloc[i].z < mesh.iloc[k].z:
                 # Draw inter-fiber connection
-                plt.plot(*np.c_[a, c], '--ok',
-                         lw=1, mfc='none', ms=3, alpha=0.2)
+                plt.plot(*np.c_[a, c], "--ok", lw=1, mfc="none", ms=3, alpha=0.2)
             if mesh.iloc[i].fiber == mesh.iloc[k].fiber:
                 # Draw fiber end nodes
-                plt.plot(*np.c_[a, c], '+k', ms=3, alpha=0.2)
+                plt.plot(*np.c_[a, c], "+k", ms=3, alpha=0.2)
     # Set drawing box dimensions
-    ax.set_xlim(-0.5 * mesh.attrs["size"], 0.5 * mesh.attrs["size"])
-    ax.set_ylim(-0.5 * mesh.attrs["size"], 0.5 * mesh.attrs["size"])
+    ax.set_xlim(-0.5 * mesh.attrs["sizeX"], 0.5 * mesh.attrs["sizeX"])
+    ax.set_ylim(-0.5 * mesh.attrs["sizeY"], 0.5 * mesh.attrs["sizeY"])
     plt.show()
